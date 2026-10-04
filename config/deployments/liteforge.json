@@ -1,0 +1,44 @@
+{
+  "network": "LitVM LiteForge Testnet",
+  "chainId": 4441,
+  "hexChainId": "0x1159",
+  "rpcUrl": "https://liteforge.rpc.caldera.xyz/http",
+  "publicRpcUrl": "https://liteforge.rpc.caldera.xyz/http",
+  "requiredConfirmations": 1,
+  "token": {
+    "name": "LiteForge zkLTC",
+    "symbol": "zkLTC",
+    "decimals": 18,
+    "address": null,
+    "abi": []
+  },
+  "contracts": {
+    "casino": {
+      "name": "VeyraCasino",
+      "address": "0xd2c36B83B1Ca788743E3E9b339e043b6B04e3273",
+      "abiPath": "config/abi/VeyraCasino.json"
+    }
+  },
+  "roles": {
+    "casino_wager": {
+      "contract": "casino",
+      "source": "event",
+      "name": "WagerPlaced",
+      "userField": "player",
+      "amountField": "amount",
+      "sessionField": "sessionId"
+    },
+    "casino_payout": {
+      "contract": "casino",
+      "source": "event",
+      "name": "WinningsClaimed",
+      "userField": "player",
+      "amountField": "payoutAmount",
+      "sessionField": "sessionId",
+      "nonceField": "nonce"
+    }
+  },
+  "owner": "0x69ddc4323F4DC443bfb8C1aAeb43b30Dbb8Ae044",
+  "authorizedSigner": "0xb4193324e92c8354fdbf7607421296bc7b6c7e74",
+  "abiPath": "config/abi/VeyraCasino.json"
+}

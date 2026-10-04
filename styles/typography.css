@@ -1,0 +1,34 @@
+/* Veyra multi-font system. Each family has one deliberate role. */
+:root{
+  --font-display:"Audiowide",system-ui,sans-serif;
+  --font-future:"Orbitron",system-ui,sans-serif;
+  --font-action:"Oxanium",system-ui,sans-serif;
+  --font-data:"Rajdhani",system-ui,sans-serif;
+  --font-copy:"Exo 2",system-ui,sans-serif;
+  --font-reading:"Space Grotesk",system-ui,sans-serif;
+  --font-mystery:"Michroma",system-ui,sans-serif;
+  --font-secret:"Zen Dots",system-ui,sans-serif;
+}
+body{font-family:var(--font-copy)}
+button,.btn,input,select,textarea,.round-btn,.wallet-disconnect{font-family:var(--font-action)!important}
+section h2,section h3,.modal-card h3{font-family:var(--font-future)!important}
+code,.casino-tx,.round-info,.balance-copy{font-family:var(--font-data)!important}
+.logo,.boot-logo{font-family:var(--font-display)!important;font-weight:400!important}
+.hero-line,.menu-story .menu-intro,.menu-story .menu-lester,.enter-caption{font-family:var(--font-copy)}
+.menu-story .menu-intro,.litvm-note,.pause-sub,.controls-col,.modal-card p{font-family:var(--font-reading)}
+.logo-eyebrow,.pause-card h2,.modal-card h3,.controls-col h4{font-family:var(--font-future)}
+.mystery-copy p{font-family:var(--font-future)}
+.mystery-copy p:nth-child(2){font-family:var(--font-mystery);font-size:.82em;line-height:1.65;letter-spacing:.055em}
+.mystery-copy p:nth-child(3){font-family:var(--font-copy)}
+.menu-invite .btn-primary{font-family:var(--font-action)!important;font-weight:700!important}
+.menu-invite small{font-family:var(--font-copy)}
+.menu-foot{font-family:var(--font-future)}
+.litvm-note,.litvm-note strong{font-family:var(--font-data)}
+.hud,.chip,.balance-copy,.hud-hint,#city-minimap{font-family:var(--font-data)}
+.balance-copy small,.round-info,.casino-tx,.casino-result-amount{font-family:var(--font-data)!important}
+.casino-game-title{font-family:var(--font-future)!important}
+.casino-wager-panel,.casino-wager-panel *,.casino-outcome-panel,.casino-outcome-panel *{font-family:var(--font-data)!important}
+.ov-controls button,.casino-wager-panel button{font-family:var(--font-action)!important;font-weight:700!important}
+.wallet-panel,.arcade-account-panel{font-family:var(--font-copy)}
+#boot-splash:after{content:"INITIALIZING CITY";position:absolute;top:calc(50% + 56px);left:50%;transform:translateX(-50%);font:400 8px var(--font-secret);letter-spacing:.22em;color:rgba(255,232,0,.62)}
+@media(max-height:470px){.mystery-copy p:nth-child(2){font-size:7.5px;line-height:1.5}}

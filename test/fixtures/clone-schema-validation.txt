@@ -1,0 +1,75 @@
+Output format is unaligned.
+orphan_game_sessions|0
+orphan_arcade_rewards_user|0
+orphan_arcade_rewards_session|0
+orphan_withdrawals|0
+orphan_social|0
+orphan_casino_sessions|0
+orphan_casino_claims_session|0
+orphan_blockchain|0
+arcade_balance_sum|0.04250000|0.05750000|0.01500000
+withdrawal_amount_sum|0.02600000
+social_binary_bytes|8
+casino_wager_sum|0.00150000|payout_sum|0.00150000
+arcade_rounds_exists|1
+required_index|arcade_rounds_expiry
+required_index|arcade_rounds_user_time
+required_index|casino_wager_tx_unique
+required_index|game_sessions_client_id
+required_index|game_sessions_user_time
+required_index|reward_history_user_time
+required_index|social_user_attempt_unique
+required_index|withdrawal_tx_unique
+required_index|withdrawal_user_idempotency_unique
+Output format is unaligned.
+constraint|arcade_reward_history_amount_check|c
+constraint|arcade_reward_history_balance_after_check|c
+constraint|arcade_reward_history_game_session_id_fkey|f
+constraint|arcade_reward_history_game_session_id_key|u
+constraint|arcade_reward_history_pkey|p
+constraint|arcade_reward_history_referral_id_fkey|f
+constraint|arcade_reward_history_user_id_fkey|f
+constraint|arcade_rounds_game_check|c
+constraint|arcade_rounds_game_session_id_fkey|f
+constraint|arcade_rounds_game_session_id_wave_key|u
+constraint|arcade_rounds_pkey|p
+constraint|arcade_rounds_status_check|c
+constraint|arcade_rounds_user_id_fkey|f
+constraint|arcade_rounds_wave_check|c
+constraint|casino_claims_casino_session_id_fkey|f
+constraint|casino_claims_casino_session_id_key|u
+constraint|casino_claims_claim_nonce_key|u
+constraint|casino_claims_payout_check|c
+constraint|casino_claims_pkey|p
+constraint|casino_claims_status_check|c
+constraint|casino_claims_transaction_hash_key|u
+constraint|casino_claims_user_id_fkey|f
+constraint|casino_claims_wager_check|c
+constraint|casino_sessions_game_check|c
+constraint|casino_sessions_payout_check|c
+constraint|casino_sessions_pkey|p
+constraint|casino_sessions_status_check|c
+constraint|casino_sessions_user_id_fkey|f
+constraint|casino_sessions_wager_check|c
+constraint|game_sessions_game_check|c
+constraint|game_sessions_pkey|p
+constraint|game_sessions_reward_check|c
+constraint|game_sessions_score_check|c
+constraint|game_sessions_user_id_fkey|f
+constraint|game_sessions_validation_status_check|c
+constraint|game_sessions_waves_check|c
+constraint|social_verifications_attempt_number_check|c
+constraint|social_verifications_pkey|p
+constraint|social_verifications_status_check|c
+constraint|social_verifications_user_id_fkey|f
+constraint|withdrawals_amount_check|c
+constraint|withdrawals_pkey|p
+constraint|withdrawals_status_check|c
+constraint|withdrawals_user_id_fkey|f
+BEGIN
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+new_game_round_insertions|2
+ROLLBACK

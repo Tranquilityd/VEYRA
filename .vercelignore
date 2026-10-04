@@ -1,0 +1,10 @@
+.env
+.env.*
+.vercel
+.git
+node_modules
+contracts/node_modules
+contracts/artifacts
+contracts/cache
+test
+scripts/run-casino-e2e.js

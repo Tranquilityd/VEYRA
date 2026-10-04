@@ -1,0 +1,13 @@
+/* Compact site-entry verification layered onto the existing cinematic invite. */
+.site-entry-gate{width:100%;margin:0 0 9px;padding:8px 10px 7px;box-sizing:border-box;border:1px solid rgba(255,211,125,.34);border-radius:12px;background:linear-gradient(115deg,rgba(8,13,20,.88),rgba(27,20,27,.84));box-shadow:0 8px 24px rgba(0,0,0,.34);backdrop-filter:blur(7px)}
+.site-entry-heading{margin-bottom:5px;color:#ffe0a0;font:700 9px/1.2 "Orbitron",system-ui;letter-spacing:.18em;text-align:center}
+.site-entry-challenge{width:100%;min-height:34px;overflow:hidden;border-radius:7px;display:flex;justify-content:center}.site-entry-challenge>div{max-width:100%}
+.site-entry-status{min-height:13px;margin-top:4px;color:#aeb8c6;font:600 9px/1.35 "Exo 2",system-ui;letter-spacing:.04em;text-align:center}
+.site-entry-challenge.verified{min-height:0}.site-entry-challenge.verified+.site-entry-status{color:#baf59f}
+.menu-invite .btn-primary:disabled{cursor:not-allowed;opacity:.5;filter:saturate(.55);animation:none;transform:none;box-shadow:0 7px 22px rgba(0,0,0,.35)}
+.menu-invite .btn-primary:disabled:before,.menu-invite .btn-primary:disabled span:after{animation:none;opacity:0}
+.menu-invite .btn-primary.site-entry-ready{opacity:1;filter:none;animation:ctaReady .42s ease-out,ctaBreathe 3.8s ease-in-out .42s infinite}
+@keyframes ctaReady{0%{transform:scale(.985);filter:brightness(.75)}65%{transform:scale(1.018);filter:brightness(1.22)}100%{transform:scale(1);filter:none}}
+@media(max-height:560px){.site-entry-gate{padding:5px 8px;margin-bottom:5px}.site-entry-heading{display:none}.site-entry-challenge{min-height:30px}.site-entry-status{font-size:8px;margin-top:2px}.menu-invite{bottom:34px}}
+@media(max-width:760px){.site-entry-gate{padding-inline:7px}}
+@media(prefers-reduced-motion:reduce){.menu-invite .btn-primary.site-entry-ready{animation:none!important}}

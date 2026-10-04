@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0d1420">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="description" content="Explore VEYRAWLD, a playable city where discovery, games, and Litecoin-powered experiences come together.">
+<meta name="application-name" content="VEYRAWLD">
+<meta name="apple-mobile-web-app-title" content="VEYRAWLD">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://veyra-tawny.vercel.app/">
+<meta property="og:title" content="VEYRAWLD">
+<meta property="og:description" content="Explore a playable city where discovery, games, and Litecoin-powered experiences come together.">
+<meta property="og:site_name" content="VEYRAWLD">
+<meta property="og:image" content="https://veyra-tawny.vercel.app/assets/brand/veyrawld-logo.jpg">
+<meta property="og:image:secure_url" content="https://veyra-tawny.vercel.app/assets/brand/veyrawld-logo.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="676">
+<meta property="og:image:height" content="774">
+<meta property="og:image:alt" content="Official VEYRAWLD logo">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="VEYRAWLD">
+<meta name="twitter:description" content="Explore a playable city where discovery, games, and Litecoin-powered experiences come together.">
+<meta name="twitter:image" content="https://veyra-tawny.vercel.app/assets/brand/veyrawld-logo.jpg">
+<meta name="twitter:image:alt" content="Official VEYRAWLD logo">
+<title>VEYRAWLD</title>
+<link rel="canonical" href="https://veyra-tawny.vercel.app/">
+<link rel="icon" type="image/jpeg" href="assets/brand/veyrawld-logo.jpg">
+<link rel="apple-touch-icon" href="assets/brand/veyrawld-logo.jpg">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Exo+2:wght@400;500;600&family=Michroma&family=Orbitron:wght@600;700&family=Oxanium:wght@600;700&family=Rajdhani:wght@500;600;700&family=Space+Grotesk:wght@400;500&family=Zen+Dots&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/main.css">
+<link rel="stylesheet" href="styles/landing-refinement.css">
+<link rel="stylesheet" href="styles/veyra-identity.css">
+<link rel="stylesheet" href="styles/typography.css">
+<link rel="stylesheet" href="styles/balance-cards.css">
+<link rel="stylesheet" href="styles/site-entry-gate.css">
+<link rel="stylesheet" href="styles/guide.css">
+<link rel="stylesheet" href="styles/credits.css">
+<link rel="stylesheet" href="styles/pause-menu.css">
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<div id="ui">
+  <!-- ============ MENU SCREEN ============ -->
+  <section data-screen="menu" id="screen-menu" class="screen">
+    <div class="menu-scrim"></div>
+    <div class="city-glow city-glow-a"></div><div class="city-glow city-glow-b"></div>
+    <div class="menu-particles" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="menu-top-right">
+      <button id="btn-fullscreen-menu" class="icon-btn" aria-label="Full screen"></button>
+      <button id="btn-sound-menu" class="icon-btn" aria-label="Toggle sound"></button>
+    </div>
+    <div class="menu-content">
+      <div class="menu-story">
+        <img class="official-brand-logo" src="assets/brand/veyrawld-logo.jpg" alt="Official VEYRAWLD logo" width="676" height="774">
+        <div class="logo-eyebrow">WELCOME TO THE PLAZA DISTRICT</div>
+        <h1 class="logo">VEYRAWLD</h1>
+        <div class="hero-line">A living city.<br><em>A world waiting to be discovered.</em></div>
+        <p class="menu-intro">Veyra is a world where exploration, games and the next generation of Litecoin-powered technology come together.</p>
+        <p class="menu-lester">Take control of <b>Lester</b>. Explore the city. Find the places others haven't discovered yet.</p>
+      </div>
+      <div class="mystery-copy" aria-label="Discover the mystery beneath Veyra">
+        <p>Something is happening beneath the city...</p>
+        <p>Games. Hidden places. Unexpected encounters.</p>
+        <p>And perhaps a few things you weren't supposed to find.</p>
+      </div>
+      <p class="litvm-note">Powered by the emerging <strong>LitVM</strong> ecosystem and <strong>zkLTC</strong>, Veyra brings blockchain technology into a world you can actually explore.</p>
+      <div class="menu-invite">
+        <div class="site-entry-gate" aria-label="Site entry verification">
+          <div class="site-entry-heading">VERIFY TO ENTER</div>
+          <div id="site-entry-challenge" class="site-entry-challenge"></div>
+          <div id="site-entry-status" class="site-entry-status" aria-live="polite">Checking verification…</div>
+        </div>
+        <div class="cta-beacon" aria-hidden="true"><i></i><i></i><i></i></div>
+        <button id="btn-play" class="btn btn-primary" disabled><span>STEP INTO VEYRA</span><b aria-hidden="true">→</b></button>
+        <div class="enter-caption">The city is waiting.</div>
+        <small>Explore the Plaza District as Lester.</small>
+      </div>
+      <div class="menu-foot"><span>EXPLORE</span><span class="dot">•</span><span>PLAY</span><span class="dot">•</span><span>DISCOVER</span><span id="menu-ver" class="menu-version">v0.1.0</span></div>
+    </div>
+  </section>
+
+  <!-- ============ HUD ============ -->
+  <section data-screen="hud" id="screen-hud" class="screen hud">
+    <div class="hud-top">
+      <div class="chip" id="chip-zone">
+        <svg viewBox="0 0 24 24" class="ic"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z" fill="currentColor"/></svg>
+        <span id="zone-name">Veyra Avenue</span>
+      </div>
+      <div class="hud-top-right">
+        <button class="chip chip-zk balance-chip arcade-balance-card" id="chip-zk" title="Arcade Game Balance — internal server-validated rewards, not yet in your wallet">
+          <svg viewBox="0 0 40 40" class="balance-icon arcade-token" aria-hidden="true"><defs><linearGradient id="arcadeTokenFace" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b8afff"/><stop offset=".48" stop-color="#0800C3"/><stop offset="1" stop-color="#3B000B"/></linearGradient></defs><circle cx="20" cy="22" r="15" fill="#27075a" opacity=".8"/><circle cx="20" cy="19" r="15" fill="url(#arcadeTokenFace)" stroke="#7A6BB2" stroke-width="2"/><circle cx="20" cy="19" r="10.5" fill="#10074a" stroke="#FFE800" stroke-width="1" stroke-dasharray="3 2"/><path d="M14 13.5 20 27l6-13.5h-4l-2 6-2-6z" fill="#FFE800"/></svg>
+          <span class="balance-copy"><small>ARCADE BALANCE</small><b id="zk-amount">0.00000 zkLTC</b><em>ARCADE · IN-GAME</em></span>
+        </button>
+        <button class="chip balance-chip main-balance-card" id="chip-wallet" title="Connect Main Wallet">
+          <svg viewBox="0 0 40 40" class="balance-icon zkl-tcoin" aria-hidden="true"><defs><linearGradient id="zklCoinFace" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".42" stop-color="#cbd2da"/><stop offset="1" stop-color="#737d89"/></linearGradient></defs><circle cx="20" cy="22" r="15" fill="#59616b"/><circle cx="20" cy="19" r="15" fill="url(#zklCoinFace)" stroke="#f5f7fa" stroke-width="1.5"/><circle cx="20" cy="19" r="11" fill="none" stroke="#8e99a6" stroke-width="1"/><path d="M22.8 9.5 19 11.2l-2.1 9.3-3.2 1.5-.8 3.4 12.5-5.7.8-3.4-5 2.3z" fill="#4f5965"/></svg>
+          <span class="balance-copy"><small id="wallet-address-short">MAIN BALANCE</small><b id="wallet-amount">CONNECT WALLET</b><em>zkLTC · ON-CHAIN</em></span>
+        </button>
+        <button id="btn-wallet-disconnect" class="wallet-disconnect" aria-label="Disconnect wallet" title="Disconnect wallet">×</button>
+        <button id="btn-sound-hud" class="icon-btn" aria-label="Toggle sound"></button>
+        <button id="btn-fullscreen" class="icon-btn" aria-label="Full screen"></button>
+        <button id="btn-pause" class="icon-btn" aria-label="Pause">
+          <svg viewBox="0 0 24 24" class="ic"><rect x="6" y="5" width="4" height="14" rx="1.4" fill="currentColor"/><rect x="14" y="5" width="4" height="14" rx="1.4" fill="currentColor"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="hud-bottom touch-only">
+      <div class="touch-buttons">
+        <button id="btn-run" class="round-btn" aria-label="Run (hold)">RUN</button>
+        <button id="btn-interact" class="round-btn accent" aria-label="Interact">A</button>
+      </div>
+    </div>
+    <div class="hud-hint desktop-only" id="hud-hint">WASD / Arrows move · Shift run · E interact · Esc pause</div>
+  </section>
+
+  <!-- ============ PAUSE ============ -->
+  <section data-screen="pause" id="screen-pause" class="screen pause">
+    <div class="pause-card" role="dialog" aria-modal="true" aria-labelledby="pause-title">
+      <header class="pause-header">
+        <img class="pause-brand-logo" src="assets/brand/veyrawld-logo.jpg" alt="" width="676" height="774">
+        <div class="pause-heading">
+          <span class="pause-brand">VEYRAWLD</span>
+          <h2 id="pause-title">PAUSED</h2>
+          <div class="pause-sub">Veyra Plaza District</div>
+        </div>
+      </header>
+      <button id="btn-resume" class="btn pause-action pause-resume"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10-6.5z" fill="currentColor"/></svg><span>RESUME</span><kbd>ESC</kbd></button>
+      <div class="pause-action-grid">
+        <button id="btn-guide" class="btn pause-action"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h5.3c1 0 1.7.3 1.7 1.2v13.8c0-.9-.7-1.2-1.7-1.2H5zM19 4.5h-5.3c-1 0-1.7.3-1.7 1.2v13.8c0-.9.7-1.2 1.7-1.2H19z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><span>GUIDE</span></button>
+        <button id="btn-controls-2" class="btn pause-action"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8h10a5 5 0 0 1 4.6 7l-1 2.4a2.3 2.3 0 0 1-3.7.8L15 16h-6l-1.9 2.2a2.3 2.3 0 0 1-3.7-.8l-1-2.4A5 5 0 0 1 7 8Z" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M7 11v4M5 13h4M16.5 12h.01M18.5 14h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>CONTROLS</span></button>
+        <button id="btn-credits" class="btn pause-action"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M5.5 19c.5-4 2.7-6 6.5-6s6 2 6.5 6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span>CREDITS</span></button>
+        <a id="btn-support" class="btn pause-action" href="https://t.me/Heishim94" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4 3.8 10.3c-1.1.4-1.1 1.1-.2 1.4l4.1 1.3 1.6 5c.2.6.1.8.7.8.5 0 .7-.2 1-.5l2-2 4.2 3.1c.8.4 1.3.2 1.5-.7l2.7-12.8C21.7 4.1 20.9 3.6 20 4Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="m7.7 13 9.7-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span>SUPPORT</span></a>
+      </div>
+      <button id="btn-sound-pause" class="btn pause-action pause-sound"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span>Sound: On</span></button>
+      <div class="pause-divider" aria-hidden="true"></div>
+      <button id="btn-quit" class="btn pause-action pause-quit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5H5v14h5M14 8l4 4-4 4M8 12h10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>QUIT TO MENU</span></button>
+    </div>
+  </section>
+
+  <!-- ============ VEYRA GUIDE ============ -->
+  <div id="modal-guide" class="guide-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="guide-title">
+    <article class="guide-shell">
+      <header class="guide-head">
+        <div><span class="guide-kicker">PLAZA DISTRICT FIELD MANUAL</span><h2 id="guide-title">VEYRAWLD GUIDE</h2></div>
+        <button id="btn-close-guide" class="guide-close" aria-label="Close VEYRAWLD Guide">× <span>CLOSE</span></button>
+      </header>
+      <nav class="guide-nav" aria-label="Guide sections">
+        <a href="#guide-welcome">Welcome</a><a href="#guide-controls">Getting Around</a><a href="#guide-wallet">Wallet</a><a href="#guide-casino">Casino</a><a href="#guide-plinko">Plinko</a><a href="#guide-arcade">Arcade</a><a href="#guide-fairness">Fairness</a><a href="#guide-withdrawals">Withdrawals</a><a href="#guide-faq">FAQ</a>
+      </nav>
+      <div class="guide-scroll" id="guide-scroll" tabindex="0">
+        <section id="guide-welcome" class="guide-hero guide-section"><div class="guide-icon">◆</div><div><h3>Welcome to Veyra</h3><p>Veyra is a living, explorable city on the LitVM LiteForge Testnet. You play as Lester: walk the Plaza District, meet NPCs, enter interactive buildings, discover animals and landmarks, and find casino and arcade activities woven into the world.</p></div></section>
+
+        <section id="guide-controls" class="guide-section"><h3>🧭 Getting Around</h3><div class="guide-grid">
+          <div class="guide-card"><h4>Desktop</h4><p><b>WASD / Arrow keys</b> move Lester, <b>Shift</b> runs, <b>E / Enter</b> interacts, <b>Esc / P</b> pauses, and <b>M</b> mutes.</p></div>
+          <div class="guide-card"><h4>Mobile</h4><p>Use the left-thumb virtual stick to move, hold <b>RUN</b> to sprint, tap <b>A</b> to interact, and use the pause icon for this menu. Veyra requires landscape orientation on mobile.</p></div>
+          <div class="guide-card"><h4>Explore & interact</h4><p>Approach doors, NPCs, objects, casino machines, arcade cabinets, or the basketball court and use Interact. The live city map tracks Lester and nearby districts and landmarks.</p></div>
+        </div></section>
+
+        <section id="guide-wallet" class="guide-section"><h3>👛 Your Wallet</h3><p>Connect and authenticate an EVM-compatible wallet on <b>LitVM LiteForge Testnet</b>. The <b>Main Balance</b> is your on-chain zkLTC used for casino wagers, claims, and applicable network gas. The <b>Arcade Game Balance</b> is a separate, server-validated rewards ledger; it is not your wallet balance and cannot be altered by client storage.</p><div class="guide-callout">Network: LitVM LiteForge Testnet · Chain ID 4441 · Native test token: zkLTC</div></section>
+
+        <section id="guide-casino" class="guide-section"><h3>🎰 Casino</h3><p>Choose a game and enter a wager from <b>0.0005 to 1 zkLTC</b>. Your wallet signs and submits the wager; Veyra independently tracks its on-chain confirmation before resolving the outcome. The backend commits to fairness inputs before resolution, returns the predetermined result, and the animation presents that result. A positive payout creates a claim flow; the result remains visible during the existing result/claim delay before winnings are claimed. Outcomes come from Veyra’s committed HMAC-SHA256 fairness engine—not smart-contract randomness. Winnings are never guaranteed.</p>
+          <div class="guide-game-grid">
+            <div class="guide-card"><h4>Plinko</h4><p>Choose 1–5 balls and Low, Medium, or High risk. Each ball receives a committed multiplier; the animated ball travels to the matching pocket. See the detailed Plinko table below.</p></div>
+            <div class="guide-card"><h4>Slots</h4><p>Three symbols are resolved. Three 7s pay <b>25×</b>, three stars <b>12×</b>, any other matching nonblank triple <b>8×</b>, and any nonblank pair <b>2×</b>. Other combinations pay 0×.</p></div>
+            <div class="guide-card"><h4>Dice</h4><p>Two six-sided dice are resolved. Choose <b>Under 7</b> or <b>Over 7</b> for <b>2×</b> when correct, or choose <b>Seven</b> for <b>5×</b>. A choice that does not match pays 0×.</p></div>
+            <div class="guide-card"><h4>Heads & Tails</h4><p>Choose Heads or Tails before resolution. A matching side pays <b>2×</b>; a non-match pays 0×.</p></div>
+          </div>
+        </section>
+
+        <section id="guide-plinko" class="guide-section"><h3>🔻 Plinko — Current Global Balance</h3><p>Enter a valid wager, choose the ball count and risk, then confirm the wallet transaction. Nine rows of pegs animate each ball toward the pocket assigned by the already-determined server result. The pocket label is the payout multiplier for that ball’s share of the wager. The path never decides or changes the result.</p>
+          <div class="guide-table-wrap"><table><thead><tr><th>Risk</th><th>Multiplier probabilities</th><th>RTP / house edge</th></tr></thead><tbody>
+            <tr><td><b>Low</b></td><td>0× 4% · 0.5× 25% · 1× 50% · 1.5× 16% · 2× 5%</td><td>96.5% / 3.5%</td></tr>
+            <tr><td><b>Medium</b></td><td>0× 13% · 0.5× 29% · 1× 32% · 1.5× 15% · 2× 7% · 3× 3% · 5× 1%</td><td>97% / 3%</td></tr>
+            <tr><td><b>High</b></td><td>0× 36% · 0.5× 21% · 1× 18% · 1.5× 10% · 2× 7% · 3× 4% · 5× 3% · 10× 1%</td><td>94.5% / 5.5%</td></tr>
+          </tbody></table></div>
+          <p>Each ball uses the same global distribution for its selected risk. More balls split the total wager; they do not personalize or alter the odds. The result panel reports each multiplier and aggregate payout. Positive winnings follow the existing two-second result/claim presentation before claiming.</p>
+        </section>
+
+        <section id="guide-arcade" class="guide-section"><h3>🕹️ Arcade & Games</h3><p>Arcade games are free-play activities separate from casino wagering. Authenticated runs are validated by the backend and credit the separate Arcade Game Balance at <b>0.00001 zkLTC per validated completed wave</b>; client estimates never directly credit balance.</p>
+          <div class="guide-game-grid">
+            <div class="guide-card"><h4>Memory Rush</h4><p>Watch the lit pattern, then tap the same cells. Grid size, tile count, pattern shape, and preview time progress by wave. Three misses end the run. Preview time never drops below 1.8 seconds.</p></div>
+            <div class="guide-card"><h4>Tile Shift</h4><p>Memorize the target, then select two tiles to swap them and restore the pattern within the move budget. Every puzzle is generated from a solved board by valid swaps, so it remains solvable.</p></div>
+            <div class="guide-card"><h4>Neon Escape</h4><p>Use WASD, arrow keys, or touch steering to stay inside the moving safe zone while deterministic laser and electric patterns sweep the arena. Each server-issued wave increases duration, overlap, speed, or reduces safe space. Only server-replayed action sequences earn Arcade Balance.</p></div>
+            <div class="guide-card"><h4>N-Back</h4><p>Watch each grid position and choose MATCH when it equals the position shown N steps earlier, or NO MATCH when it does not. Server-issued rounds progressively increase N, grid size, sequence length, and pace. Every ordered response is independently checked before Arcade Balance is credited.</p></div>
+            <div class="guide-card guide-wide"><h4>🏀 Basketball</h4><p>Interact at the court to start a 60-second timing game. The white dot moves across the heat bar; tap <b>SHOOT</b> (or Space/Enter) while it is inside the fixed green center zone. A made shot earns <b>+1 point</b>, raises the Heat level, and speeds up the dot (capped at 3.2). Misses score nothing. Your local high score is saved on the device. Basketball currently emits <b>no Arcade Balance reward</b>.</p></div>
+          </div>
+        </section>
+
+        <section id="guide-fairness" class="guide-section"><h3>⚖️ Fairness & Transparency</h3><p>Casino sessions use <b>HMAC-SHA256</b>. Before resolution, Veyra creates a secret server seed and exposes its SHA-256 commitment together with the player’s client seed and session nonce. Deterministic indexed draws select the game result. After reveal, the in-game verifier hashes the revealed server seed, checks it against the commitment, and reproduces the outcome from the same seed, nonce, game, inputs, and draw indexes.</p><div class="guide-callout">When checking a round, confirm the fairness version and algorithm, server-seed hash, revealed seed, client seed, nonce, selected game/input, and reproduced outcome. Plinko v2 uses the current probabilities above; historical v1 Plinko records remain verifiable. Animation only displays the committed backend result.</div></section>
+
+        <section id="guide-withdrawals" class="guide-section"><h3>💸 Arcade Withdrawals</h3><ol class="guide-steps">
+          <li>Connect and authenticate your wallet, then open <b>Arcade Account</b>.</li><li>Have at least the actual minimum: <b>0.005 zkLTC</b> available.</li>
+          <li>For the first withdrawal only, follow the founder at <b>@HeisHim94</b> and official game at <b>@VEYRAWLD</b>, enter your X username, and upload PNG/JPEG/WebP screenshot proof under 800 KB.</li>
+          <li>Your proof enters <b>pending</b> admin review. A rejected proof may be resubmitted. Approval marks social verification complete; later withdrawals do not repeat it.</li>
+          <li>Complete the withdrawal security check and submit. The request enters <b>pending</b>; that amount is reserved but not yet deducted.</li>
+          <li>Admin processing ends as <b>sent</b>, <b>cancelled</b>, or <b>failed</b>. Payment is manual. Balance is deducted exactly once only when admin marks it Sent/Paid and records a payment reference.</li>
+        </ol></section>
+
+        <section class="guide-section"><h3>⛓️ Transactions & Network</h3><p>Veyra uses <b>LitVM LiteForge Testnet</b>, chain ID <b>4441</b>, with native testnet currency <b>zkLTC</b>. Wallet signatures authenticate your session. Casino wagers require an on-chain wager transaction; positive winnings require a claim transaction. Arcade withdrawals follow the separate reviewed/manual workflow. Keep enough testnet zkLTC for wagers and any applicable gas, and inspect the requested network, amount, and method before signing.</p></section>
+
+        <section class="guide-section"><h3>🛡️ Safety</h3><div class="guide-grid"><div class="guide-card"><h4>Protect your keys</h4><p>Never share your seed phrase or private key. Veyra will never ask for either.</p></div><div class="guide-card"><h4>Review signatures</h4><p>Only sign messages and transactions you understand. Check chain 4441, destination, amount, and transaction details.</p></div><div class="guide-card"><h4>Avoid impersonators</h4><p>Use trusted Veyra links and verify official accounts. Ignore fake support messages, links, and token claims.</p></div></div></section>
+
+        <section id="guide-faq" class="guide-section"><h3>❓ FAQ</h3><div class="guide-faq">
+          <details><summary>What is Veyra?</summary><p>An explorable LitVM testnet city featuring Lester, interactive venues, casino games, and server-validated arcade activities.</p></details>
+          <details><summary>What is zkLTC, and is this mainnet LTC?</summary><p>zkLTC is the native currency of LitVM LiteForge Testnet. It is testnet currency, not real Litecoin mainnet LTC.</p></details>
+          <details><summary>Why can’t I press PLAY?</summary><p>Complete the site-entry hCaptcha. PLAY remains locked until the server issues a valid signed entry session.</p></details>
+          <details><summary>Why verify before entering?</summary><p>The server-validated check helps protect Veyra from automated abuse. Client state alone cannot authorize entry.</p></details>
+          <details><summary>What happens when I win?</summary><p>The authoritative result and payout appear, then a positive payout follows the result/claim delay and wallet claim flow.</p></details>
+          <details><summary>Where do Arcade winnings go?</summary><p>Validated rewards go to the separate server-authoritative Arcade Game Balance, not directly to the Main Wallet.</p></details>
+          <details><summary>How do I withdraw Arcade winnings?</summary><p>Meet the 0.005 zkLTC minimum, complete first-time social verification when required, pass the withdrawal security check, and submit for admin processing.</p></details>
+          <details><summary>Why is my withdrawal pending?</summary><p>Pending requests await manual review/payment. The amount is reserved and only deducted when marked Sent/Paid.</p></details>
+          <details><summary>What if a transaction fails?</summary><p>Read the wallet and Veyra status, confirm the network and balance, then retry tracking where offered. Never resubmit blindly if a transaction may already exist.</p></details>
+          <details><summary>How does fairness work?</summary><p>A committed server seed, client seed, nonce, game input, and deterministic HMAC-SHA256 draws reproduce the result after seed reveal.</p></details>
+        </div></section>
+      </div>
+    </article>
+  </div>
+
+  <!-- ============ VEYRA CREDITS ============ -->
+  <div id="modal-credits" class="guide-overlay credits-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="credits-title">
+    <article class="guide-shell credits-shell">
+      <header class="guide-head">
+        <div><span class="guide-kicker">THE PEOPLE &amp; TECHNOLOGY BEHIND THE CITY</span><h2 id="credits-title">VEYRAWLD CREDITS</h2></div>
+        <button id="btn-close-credits" class="guide-close" aria-label="Close VEYRAWLD Credits">× <span>CLOSE</span></button>
+      </header>
+      <div class="guide-scroll credits-scroll" id="credits-scroll" tabindex="0">
+        <section class="credits-hero">
+          <span class="credits-wordmark">VEYRAWLD</span>
+          <p>Created &amp; Developed by</p>
+          <h3>TRANQUILITY</h3>
+        </section>
+        <section class="guide-section credits-section">
+          <h3>Creative &amp; Development Direction</h3>
+          <p>TRANQUILITY is credited for the entire Veyra project.</p>
+          <div class="credits-list" aria-label="Project credits">
+            <span>Game concept</span><span>Game design</span><span>World design</span><span>Gameplay systems</span>
+            <span>Casino systems</span><span>Arcade systems</span><span>Plinko</span><span>Basketball</span>
+            <span>UI/UX</span><span>Visual direction</span><span>Blockchain integration</span><span>Smart-contract integration</span>
+            <span>Fairness systems</span><span>Wallet integration</span><span>Backend systems</span><span>Security systems</span>
+            <span>Overall development</span>
+          </div>
+        </section>
+        <section class="guide-section credits-section credits-powered">
+          <h3>⚡ Powered by LitVM</h3>
+          <div class="credits-network"><span><b>Network</b>LitVM LiteForge Testnet</span><span><b>Chain ID</b>4441</span><span><b>Native token</b>zkLTC</span></div>
+          <p>Veyra uses browser Canvas and JavaScript, LitVM-compatible wallet and smart-contract tooling, Vercel serverless infrastructure, and hCaptcha security services. These technologies support the project and are not credited as its developers.</p>
+        </section>
+        <section class="guide-section credits-section credits-thanks">
+          <h3>Special Thanks</h3>
+          <p>To the Litecoin and LitVM communities, and to everyone who has tested Veyra and helped the city grow.</p>
+        </section>
+        <section class="credits-actions" aria-label="Credits links and donation">
+          <a class="credits-action" href="https://x.com/VEYRAWLD" target="_blank" rel="noopener noreferrer">OFFICIAL X ACCOUNT</a>
+          <a class="credits-action" href="https://x.com/HeisHim94" target="_blank" rel="noopener noreferrer">CREATOR ACCOUNT</a>
+          <button id="btn-donate" class="credits-action credits-donate" type="button">DONATE ❤️</button>
+        </section>
+        <div id="donate-fallback" class="donate-fallback hidden" aria-live="polite">
+          <span>Copy donation address manually:</span><code tabindex="0">0xb4193324e92c8354fdbf7607421296bc7b6c7e74</code>
+        </div>
+        <p class="credits-closing">Built with ⚡ for the Litecoin ecosystem</p>
+      </div>
+    </article>
+  </div>
+
+  <!-- ============ CONTROLS MODAL ============ -->
+  <div id="modal-controls" class="modal hidden">
+    <div class="modal-card">
+      <h3>CONTROLS</h3>
+      <div class="controls-grid">
+        <div class="controls-col">
+          <h4>Desktop</h4>
+          <ul>
+            <li><b>WASD / Arrows</b> Move</li>
+            <li><b>Shift</b> Run</li>
+            <li><b>E / Enter</b> Interact</li>
+            <li><b>Esc / P</b> Pause</li>
+            <li><b>M</b> Mute</li>
+          </ul>
+        </div>
+        <div class="controls-col">
+          <h4>Touch (landscape)</h4>
+          <ul>
+            <li><b>Left thumb</b> Virtual stick — move</li>
+            <li><b>RUN</b> Hold to run</li>
+            <li><b>A</b> Interact</li>
+            <li><b>❚❚</b> Pause</li>
+          </ul>
+        </div>
+      </div>
+      <button id="btn-close-controls" class="btn btn-primary">Got it</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ORIENTATION OVERLAY (mobile portrait only) ============ -->
+<div id="orientation-overlay" aria-hidden="true">
+  <div class="orient-inner">
+    <div class="phone-anim">
+      <div class="phone-ring"></div>
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <svg viewBox="0 0 60 100" class="phone-art"><circle cx="30" cy="34" r="9" fill="#8ff5ff"/><rect x="14" y="50" width="32" height="6" rx="3" fill="#ffffff66"/><rect x="20" y="62" width="20" height="6" rx="3" fill="#ffffff44"/></svg>
+        </div>
+      </div>
+      <svg class="rotate-arrow" viewBox="0 0 120 120">
+        <path d="M96 60a36 36 0 1 1-14-28.5" fill="none" stroke="#8ff5ff" stroke-width="6" stroke-linecap="round" stroke-dasharray="170" stroke-dashoffset="0"/>
+        <path d="M84 18 L84 34 L68 34" fill="none" stroke="#8ff5ff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <h2>TURN YOUR PHONE SIDEWAYS</h2>
+    <p>Veyra is designed for landscape mode. Rotate your phone horizontally for the full experience.</p>
+  </div>
+</div>
+
+<div id="test-panel" class="hidden"></div>
+<div id="boot-splash"><img class="boot-brand-logo" src="assets/brand/veyrawld-logo.jpg" alt="" width="676" height="774"><div class="boot-logo">VEYRAWLD</div><div class="boot-bar"><i></i></div></div>
+
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

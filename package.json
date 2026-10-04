@@ -1,0 +1,16 @@
+{
+  "type": "module",
+  "scripts": {
+    "db:migrate": "node scripts/migrate.js",
+    "admin:hash": "node scripts/hash-admin-password.js",
+    "check": "find src api server scripts test -name '*.js' -print0 | xargs -0 -n1 node --check",
+    "test": "node --test test/*.test.js",
+    "test:integration": "node --test test/*.test.js",
+    "test:e2e:casino": "node scripts/run-casino-e2e.js",
+    "build:static": "node scripts/build-static.js"
+  },
+  "dependencies": {
+    "postgres": "^3.4.9",
+    "viem": "^2.56.8"
+  }
+}

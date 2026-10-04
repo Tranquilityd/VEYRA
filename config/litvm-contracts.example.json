@@ -1,0 +1,17 @@
+{
+  "network": "LitVM LiteForge Testnet",
+  "chainId": 4441,
+  "publicRpcUrl": "https://liteforge.rpc.caldera.xyz/http",
+  "requiredConfirmations": null,
+  "treasuryAddress": null,
+  "token": { "symbol": "zkLTC", "address": null, "decimals": 18, "abi": [] },
+  "contracts": {
+    "casino": { "address": null, "abi": [] },
+    "arcadeWithdrawal": { "address": null, "abi": [] }
+  },
+  "roles": {
+    "casino_wager": { "contract": "casino", "source": "method", "name": null, "amountField": null, "userField": null },
+    "casino_payout": { "contract": "casino", "source": "event", "name": null, "amountField": null, "userField": null },
+    "arcade_withdrawal": { "contract": "arcadeWithdrawal", "source": "event", "name": null, "amountField": null, "userField": null }
+  }
+}

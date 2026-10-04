@@ -1,0 +1,10 @@
+total_rows|31
+duplicate_wallets|0
+duplicate_client_sessions|0
+duplicate_reward_sessions|0
+duplicate_wager_hashes|0
+legacy_game_rows_migrated|2
+retired_game_rows_remaining|0
+withdrawal_statuses|cancelled:1,pending:2,sent:2
+unexpected_withdrawal_statuses|0
+new_round_rows_after_rollback|0

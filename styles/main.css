@@ -1,0 +1,254 @@
+/* =========================================================
+   VEYRA — Phase 1 visual system / UI stylesheet
+   No external assets. System fonts only (mobile perf).
+   ========================================================= */
+:root{
+  --ink:#0d1420;
+  --panel:rgba(13,20,32,.72);
+  --panel-solid:#121a29;
+  --line:rgba(255,255,255,.14);
+  --txt:#eaf2ff;
+  --txt-dim:#9fb0c8;
+  --cyan:#35e0ff;
+  --violet:#7b5bff;
+  --gold:#ffcf6b;
+  --danger:#ff5d73;
+  --radius:14px;
+  --safe-t:env(safe-area-inset-top,0px);
+  --safe-b:env(safe-area-inset-bottom,0px);
+  --safe-l:env(safe-area-inset-left,0px);
+  --safe-r:env(safe-area-inset-right,0px);
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  margin:0;background:var(--ink);color:var(--txt);font-family:var(--font);
+  overflow:hidden;user-select:none;-webkit-user-select:none;
+  overscroll-behavior:none;
+}
+#game{
+  position:fixed;inset:0;width:100%;height:100%;display:block;
+  touch-action:none;outline:none;
+}
+#ui{position:fixed;inset:0;pointer-events:none;z-index:10}
+.screen{position:absolute;inset:0;display:none}
+.screen.active{display:block}
+.hidden{display:none !important}
+
+/* ---------------- buttons & chips ---------------- */
+.btn{
+  pointer-events:auto;cursor:pointer;border:1px solid var(--line);border-radius:999px;
+  font-family:var(--font);font-weight:700;font-size:15px;letter-spacing:.04em;
+  padding:13px 26px;color:var(--txt);background:rgba(255,255,255,.07);
+  transition:transform .12s ease, background .15s ease, box-shadow .15s ease;
+}
+.btn:active{transform:scale(.96)}
+.btn-primary{
+  background:linear-gradient(135deg,var(--cyan),var(--violet));
+  border:none;color:#06121f;font-size:17px;padding:15px 34px;
+  box-shadow:0 6px 26px rgba(53,224,255,.35), 0 2px 8px rgba(0,0,0,.4);
+}
+.btn-primary:hover{box-shadow:0 8px 32px rgba(53,224,255,.5)}
+.btn-primary .btn-ic{font-size:12px;vertical-align:2px;margin-right:6px}
+.btn-ghost{background:rgba(13,20,32,.55);backdrop-filter:blur(6px)}
+.btn-danger{background:rgba(255,93,115,.14);border-color:rgba(255,93,115,.45);color:#ffd7dd}
+.icon-btn{
+  pointer-events:auto;cursor:pointer;width:42px;height:42px;border-radius:50%;
+  border:1px solid var(--line);background:var(--panel);color:var(--txt);
+  display:inline-flex;align-items:center;justify-content:center;padding:0;
+}
+.icon-btn .ic{width:20px;height:20px}
+.icon-btn:active{transform:scale(.94)}
+.chip{
+  display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 14px;
+  border-radius:999px;background:var(--panel);border:1px solid var(--line);
+  font-size:13px;font-weight:700;letter-spacing:.03em;color:var(--txt);
+  pointer-events:none;white-space:nowrap;
+}
+.chip .ic{width:17px;height:17px;color:var(--cyan)}
+#chip-wallet .ic{color:var(--gold)}
+
+/* ---------------- cinematic city landing ---------------- */
+#screen-menu{overflow:hidden;isolation:isolate}
+#screen-menu .menu-scrim{position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,9,16,.93) 0%,rgba(5,9,16,.72) 39%,rgba(5,9,16,.2) 67%,rgba(5,9,16,.78) 100%),linear-gradient(180deg,rgba(4,7,13,.12),rgba(4,7,13,.78));backdrop-filter:saturate(1.14);animation:menuBreathe 9s ease-in-out infinite alternate}
+#screen-menu:after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 63% 48%,transparent 0 28%,rgba(4,7,13,.22) 68%,rgba(4,7,13,.75) 100%),linear-gradient(180deg,rgba(255,191,91,.05),transparent 42%);box-shadow:inset 0 0 110px rgba(0,0,0,.75);z-index:0}
+.city-glow{position:absolute;width:32vw;height:32vw;border-radius:50%;filter:blur(70px);opacity:.14;pointer-events:none;animation:cityDrift 12s ease-in-out infinite alternate}.city-glow-a{left:38%;top:12%;background:#ffbd62}.city-glow-b{right:-6%;bottom:-18%;background:#35e0ff;animation-delay:-5s}
+.menu-particles{position:absolute;inset:0;overflow:hidden;pointer-events:none}.menu-particles i{position:absolute;width:3px;height:3px;border-radius:50%;background:#ffe2a0;box-shadow:0 0 9px #ffcf6b;opacity:0;animation:menuDust 8s linear infinite}.menu-particles i:nth-child(1){left:47%;top:78%;animation-delay:-1s}.menu-particles i:nth-child(2){left:56%;top:66%;animation-delay:-4s}.menu-particles i:nth-child(3){left:67%;top:82%;animation-delay:-6s}.menu-particles i:nth-child(4){left:74%;top:58%;animation-delay:-2s}.menu-particles i:nth-child(5){left:84%;top:73%;animation-delay:-7s}.menu-particles i:nth-child(6){left:61%;top:44%;animation-delay:-3s}.menu-particles i:nth-child(7){left:92%;top:50%;animation-delay:-5s}.menu-particles i:nth-child(8){left:43%;top:56%;animation-delay:-8s}
+.menu-top-right{position:absolute;z-index:4;top:calc(var(--safe-t) + 12px);right:calc(var(--safe-r) + 12px);display:flex;gap:8px}.menu-top-right .icon-btn{background:rgba(7,12,20,.5);backdrop-filter:blur(10px)}
+.menu-content{position:absolute;z-index:2;inset:0;display:grid;grid-template-columns:minmax(300px,43%) minmax(300px,1fr);grid-template-rows:1fr auto;align-items:center;gap:clamp(22px,5vw,78px);padding:calc(var(--safe-t) + 34px) clamp(28px,6vw,96px) calc(var(--safe-b) + 20px);text-align:left}
+.menu-story{max-width:590px;animation:menuReveal .9s both}.official-brand-logo{position:absolute;right:0;top:-8px;width:clamp(52px,7vw,82px);height:auto;aspect-ratio:676/774;object-fit:contain;border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.32);filter:drop-shadow(0 0 12px rgba(53,224,255,.14))}.logo-eyebrow{font-size:clamp(9px,1.5vh,12px);letter-spacing:.4em;color:#ffd681;font-weight:900;text-shadow:0 2px 12px #000}
+.logo{margin:5px 0 8px;font-family:Georgia,"Times New Roman",serif;font-size:clamp(54px,13vh,112px);line-height:.87;font-weight:700;letter-spacing:.18em;background:linear-gradient(180deg,#fff8df 5%,#ffd88c 62%,#c78a35 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 24px rgba(255,184,74,.27));padding-left:.08em}
+.hero-line{font-family:Georgia,"Times New Roman",serif;font-size:clamp(18px,3.1vh,31px);line-height:1.22;color:#fff8e8;text-shadow:0 2px 16px #000}.hero-line em{font-style:normal;color:#b9dff0}
+.menu-intro,.menu-lester{max-width:570px;margin:clamp(8px,1.8vh,15px) 0 0;font-size:clamp(11px,1.8vh,15px);line-height:1.55;color:#c9d3df;text-shadow:0 2px 10px #000}.menu-lester{color:#eef4fa}.menu-lester b{color:#ffd681}
+.menu-invite{justify-self:end;width:min(470px,100%);padding:clamp(16px,3vh,28px);border:1px solid rgba(255,218,145,.2);border-radius:24px;background:linear-gradient(145deg,rgba(8,13,22,.78),rgba(13,20,32,.48));box-shadow:0 24px 70px rgba(0,0,0,.35),inset 0 1px rgba(255,255,255,.04);backdrop-filter:blur(12px);animation:menuReveal 1s .18s both}
+.mystery-copy{font-family:Georgia,"Times New Roman",serif}.mystery-copy p{margin:0 0 8px;color:#e9edf3;font-size:clamp(12px,1.9vh,16px);line-height:1.35;opacity:0;animation:mysteryLine .7s forwards}.mystery-copy p:first-child{color:#ffd681;font-size:clamp(14px,2.2vh,19px);animation-delay:.75s}.mystery-copy p:nth-child(2){animation-delay:1.2s}.mystery-copy p:nth-child(3){animation-delay:1.65s;color:#aebbc9}
+.litvm-note{margin:clamp(12px,2.5vh,22px) 0;color:#8fa2b8;font-size:clamp(9px,1.45vh,12px);line-height:1.5;border-left:2px solid rgba(53,224,255,.42);padding-left:11px}
+.menu-buttons{display:flex;gap:10px;align-items:center}.menu-buttons .btn-primary{min-width:min(270px,70%);display:flex;justify-content:center;align-items:center;gap:15px;font-size:clamp(15px,2.2vh,19px);letter-spacing:.14em;background:linear-gradient(120deg,#ffd06f,#f0a542 48%,#7ce4ec);color:#181109;box-shadow:0 8px 30px rgba(255,181,62,.27)}.menu-buttons .btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 38px rgba(255,181,62,.42)}.menu-buttons .btn-primary b{font-size:22px;transition:transform .2s}.menu-buttons .btn-primary:hover b{transform:translateX(4px)}.menu-buttons .btn-ghost{padding:11px 17px;font-size:12px}
+.enter-caption{margin:8px 0 0 16px;font-size:10px;letter-spacing:.08em;color:#aebbc9}.menu-foot{grid-column:1/-1;justify-self:center;font-size:10px;color:#aab6c5;letter-spacing:.28em;display:flex;gap:10px;align-items:center}.menu-foot .dot{opacity:.5}.menu-version{position:absolute;right:clamp(28px,6vw,96px);opacity:.4;letter-spacing:.08em}
+@keyframes menuReveal{from{opacity:0;transform:translateY(16px);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}@keyframes mysteryLine{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}@keyframes menuDust{0%{opacity:0;transform:translate(0,10px)}20%{opacity:.75}80%{opacity:.25}100%{opacity:0;transform:translate(24px,-90px)}}@keyframes cityDrift{to{transform:translate(28px,-16px) scale(1.08)}}@keyframes menuBreathe{to{filter:brightness(1.08)}}
+@media(max-height:470px){.menu-content{padding-top:20px;padding-bottom:10px;gap:24px}.logo{font-size:clamp(48px,12vh,72px)}.menu-intro,.menu-lester{font-size:10px;line-height:1.35;margin-top:6px}.menu-invite{padding:13px 16px}.mystery-copy p{font-size:11px;margin-bottom:5px}.mystery-copy p:first-child{font-size:13px}.litvm-note{margin:8px 0;font-size:8.5px}.btn-primary{padding-top:11px;padding-bottom:11px}.menu-foot{font-size:8px}}
+@media(max-width:760px){.menu-content{grid-template-columns:1fr 1fr;padding-left:22px;padding-right:22px;gap:16px}.logo{font-size:clamp(42px,12vh,66px)}.hero-line{font-size:16px}.menu-invite{padding:12px}.menu-top-right{top:6px;right:8px}.menu-top-right .icon-btn{width:36px;height:36px}}
+#screen-menu.entering-city{animation:enterCity .44s ease-in forwards;pointer-events:none}@keyframes enterCity{to{opacity:0;transform:scale(1.025);filter:blur(7px)}}
+@media(prefers-reduced-motion:reduce){.menu-story,.menu-invite,.mystery-copy p,.menu-particles i,.city-glow,#screen-menu .menu-scrim{animation:none!important;opacity:1}#screen-menu.entering-city{animation:enterCity .2s linear forwards}}
+
+/* ---------------- HUD ---------------- */
+.hud-top{
+  position:absolute;top:calc(var(--safe-t) + 10px);left:calc(var(--safe-l) + 12px);right:calc(var(--safe-r) + 12px);
+  display:flex;justify-content:space-between;align-items:center;gap:8px;
+}
+.hud-top-right{display:flex;gap:8px;align-items:center}
+.chip-zk{color:#b8f0a0;border-color:rgba(134,224,90,.55)}
+.chip-zk .ic{color:#86e05a}
+.balance-chip{pointer-events:auto;cursor:pointer;height:42px;padding:0 10px;font-family:var(--font)}
+.balance-chip:active{transform:scale(.97)}
+.balance-copy{display:flex;flex-direction:column;align-items:flex-start;line-height:1.05}
+.balance-copy small{font-size:8px;letter-spacing:.08em;color:var(--txt-dim);font-weight:900}
+.balance-copy b{font-size:11px;margin-top:3px}
+#chip-wallet{border-color:rgba(85,207,255,.48)}
+#chip-wallet .ic{color:var(--cyan)}
+@media(max-width:700px){.balance-copy small{display:none}.balance-chip{padding:0 8px}.balance-copy b{font-size:10px;margin:0}}
+
+.hud-bottom{
+  position:absolute;bottom:calc(var(--safe-b) + 14px);right:calc(var(--safe-r) + 16px);
+}
+.touch-buttons{display:flex;gap:12px;align-items:flex-end}
+.round-btn{
+  pointer-events:auto;cursor:pointer;width:64px;height:64px;border-radius:50%;
+  border:1px solid var(--line);background:rgba(13,20,32,.6);color:var(--txt);
+  font-family:var(--font);font-weight:900;font-size:14px;letter-spacing:.06em;
+  display:flex;align-items:center;justify-content:center;
+  touch-action:none;
+}
+.round-btn.accent{
+  width:74px;height:74px;font-size:22px;
+  background:radial-gradient(circle at 35% 30%,rgba(53,224,255,.5),rgba(53,224,255,.16));
+  border-color:rgba(53,224,255,.55);
+}
+.round-btn.lit{box-shadow:0 0 22px rgba(53,224,255,.65);border-color:var(--cyan)}
+.round-btn.held{background:rgba(255,207,107,.3);border-color:var(--gold)}
+.hud-hint{
+  position:absolute;bottom:calc(var(--safe-b) + 12px);left:50%;transform:translateX(-50%);
+  font-size:11px;color:var(--txt-dim);background:rgba(13,20,32,.5);
+  padding:6px 14px;border-radius:999px;border:1px solid var(--line);letter-spacing:.05em;
+  pointer-events:none;
+}
+.touch-only{display:none}
+body.touch .touch-only{display:block}
+body.touch.ov-open .touch-only{display:none}   /* venue stick/buttons yield to game controls */
+body.touch .desktop-only{display:none}
+
+/* ---------------- pause ---------------- */
+#screen-pause{background:rgba(6,10,18,.55);backdrop-filter:blur(8px)}
+.pause-card{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:min(340px,86vw);background:var(--panel-solid);border:1px solid var(--line);
+  border-radius:20px;padding:26px 24px;display:flex;flex-direction:column;gap:10px;
+  box-shadow:0 24px 70px rgba(0,0,0,.6);text-align:center;
+}
+.pause-card h2{margin:0;font-size:26px;letter-spacing:.28em;font-weight:900}
+.pause-card a.btn{text-decoration:none}
+.pause-sub{font-size:12px;color:var(--txt-dim);margin-bottom:8px;letter-spacing:.08em}
+
+/* ---------------- modal ---------------- */
+.modal{position:absolute;inset:0;background:rgba(6,10,18,.6);display:flex;align-items:center;justify-content:center;pointer-events:auto;z-index:40}
+.modal-card{
+  width:min(560px,92vw);max-height:86vh;overflow:auto;background:var(--panel-solid);
+  border:1px solid var(--line);border-radius:20px;padding:24px;text-align:center;
+}
+.modal-card h3{margin:0 0 14px;letter-spacing:.3em;font-size:18px}
+.controls-grid{display:flex;gap:22px;justify-content:center;flex-wrap:wrap;margin-bottom:18px;text-align:left}
+.controls-col h4{margin:0 0 8px;color:var(--cyan);font-size:12px;letter-spacing:.18em}
+.controls-col ul{list-style:none;margin:0;padding:0;font-size:13px;color:var(--txt-dim);display:flex;flex-direction:column;gap:6px}
+.controls-col b{color:var(--txt);display:inline-block;min-width:96px}
+
+/* ---------------- orientation overlay ---------------- */
+#orientation-overlay{
+  position:fixed;inset:0;z-index:100;display:none;
+  background:radial-gradient(120% 120% at 50% 0%,#16233c 0%,#0d1420 60%,#080d16 100%);
+  align-items:center;justify-content:center;text-align:center;
+}
+body.orientation-locked #orientation-overlay{display:flex}
+.orient-inner{padding:24px;display:flex;flex-direction:column;align-items:center;gap:18px;max-width:420px}
+.phone-anim{position:relative;width:190px;height:190px;display:flex;align-items:center;justify-content:center}
+.phone-ring{
+  position:absolute;inset:12px;border-radius:50%;
+  border:2px solid rgba(53,224,255,.25);
+  animation:ringPulse 2.8s ease-out infinite;
+}
+@keyframes ringPulse{
+  0%{transform:scale(.82);opacity:0}
+  35%{opacity:.9}
+  100%{transform:scale(1.12);opacity:0}
+}
+.phone{
+  width:86px;height:158px;border-radius:16px;border:3px solid rgba(255,255,255,.9);
+  background:#0a0f18;position:relative;
+  box-shadow:0 14px 40px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.12) inset;
+  animation:phoneTurn 3.2s cubic-bezier(.65,.05,.25,1) infinite;
+}
+@keyframes phoneTurn{
+  0%,18%{transform:rotate(0deg)}
+  52%,82%{transform:rotate(-90deg)}
+  100%{transform:rotate(0deg)}
+}
+.phone-notch{position:absolute;top:7px;left:50%;transform:translateX(-50%);width:30px;height:5px;border-radius:3px;background:rgba(255,255,255,.35)}
+.phone-screen{
+  position:absolute;inset:8px;border-radius:9px;overflow:hidden;
+  background:linear-gradient(160deg,#123047,#0e1a2c 60%,#123);
+  display:flex;align-items:center;justify-content:center;
+}
+.phone-art{width:70%;opacity:.9}
+.rotate-arrow{position:absolute;inset:0;animation:arrowSpin 3.2s ease-in-out infinite}
+@keyframes arrowSpin{
+  0%,18%{opacity:.25;transform:rotate(0deg)}
+  52%,82%{opacity:1;transform:rotate(-90deg)}
+  100%{opacity:.25;transform:rotate(-180deg)}
+}
+#orientation-overlay h2{
+  margin:0;font-size:clamp(20px,5.4vw,30px);font-weight:900;letter-spacing:.14em;
+  background:linear-gradient(90deg,#fff,#8ff5ff);-webkit-background-clip:text;background-clip:text;color:transparent;
+}
+#orientation-overlay p{margin:0;font-size:14px;line-height:1.6;color:var(--txt-dim)}
+
+/* ---------------- boot splash / test panel ---------------- */
+#boot-splash{
+  position:fixed;inset:0;z-index:90;background:var(--ink);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+  transition:opacity .45s ease;
+}
+#boot-splash.done{opacity:0;pointer-events:none}
+.boot-brand-logo{width:76px;height:auto;aspect-ratio:676/774;object-fit:contain;border-radius:14px;box-shadow:0 10px 32px #0008,0 0 24px rgba(53,224,255,.12)}
+.boot-logo{font-size:40px;font-weight:900;letter-spacing:.3em;padding-left:.3em;
+  background:linear-gradient(180deg,#fff,#8ff5ff 60%,#4aa8ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.boot-bar{width:180px;height:4px;border-radius:2px;background:rgba(255,255,255,.12);overflow:hidden}
+.boot-bar i{display:block;height:100%;width:40%;border-radius:2px;background:linear-gradient(90deg,var(--cyan),var(--violet));animation:bootSlide 1s ease-in-out infinite}
+@keyframes bootSlide{0%{transform:translateX(-100%)}100%{transform:translateX(320%)}}
+
+#test-panel{
+  position:fixed;left:8px;top:8px;z-index:200;max-width:440px;max-height:90vh;overflow:auto;
+  background:rgba(8,12,20,.92);border:1px solid var(--line);border-radius:10px;
+  font:11px/1.5 ui-monospace,Menlo,Consolas,monospace;color:#cfe8d8;padding:10px 12px;white-space:pre-wrap;
+  pointer-events:auto;
+}
+#test-panel .fail{color:#ff8fa0}
+#test-panel .pass{color:#8dffb0}
+.wallet-disconnect{display:none;position:relative;z-index:8;width:30px;height:30px;flex:0 0 30px;border-radius:50%;border:1px solid rgba(255,130,130,.65);background:rgba(72,20,31,.9);color:#ffd7d7;font:900 20px/1 system-ui;cursor:pointer;pointer-events:auto;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.wallet-disconnect.connected{display:grid;place-items:center}
+.wallet-disconnect:active{transform:scale(.94)}
+
+/* ---------------- small landscape phones ---------------- */
+@media (max-height:460px){
+  .logo{font-size:clamp(34px,9vh,52px)}
+  .logo-mark{width:clamp(90px,16vw,140px)}
+  .logo-sub br{display:none}
+  .menu-content{gap:8px}
+  .btn{padding:10px 20px;font-size:14px}
+  .btn-primary{padding:12px 26px;font-size:15px}
+  .pause-card{padding:16px;gap:7px}
+  .pause-card h2{font-size:20px}
+  .round-btn{width:56px;height:56px}
+  .round-btn.accent{width:66px;height:66px}
+  .icon-btn{width:38px;height:38px}
+  .chip{height:34px;font-size:12px}
+}

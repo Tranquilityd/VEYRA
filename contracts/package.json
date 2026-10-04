@@ -1,0 +1,17 @@
+{
+  "name": "veyra-casino-contracts",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "abi": "node scripts/export-abi.js",
+    "deploy:liteforge": "hardhat run scripts/deploy.js --network liteforge"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@openzeppelin/contracts": "5.2.0",
+    "dotenv": "^16.4.7",
+    "hardhat": "^2.22.19"
+  }
+}

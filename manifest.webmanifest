@@ -1,0 +1,17 @@
+{
+  "name": "VEYRAWLD",
+  "short_name": "VEYRAWLD",
+  "description": "Explore a playable city where discovery, games, and Litecoin-powered experiences come together.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d1420",
+  "theme_color": "#0d1420",
+  "icons": [
+    {
+      "src": "/assets/brand/veyrawld-logo.jpg",
+      "sizes": "676x774",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ]
+}
