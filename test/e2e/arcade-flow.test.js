@@ -3,9 +3,8 @@ import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
-import challengeHandler from '../../api/auth/challenge.js';
-import verifyHandler from '../../api/auth/verify.js';
-import arcadeHandler from '../../api/arcade/session.js';
+import authHandler from '../../api/auth/[route].js';
+import arcadeHandler from '../../api/account/[route].js';
 import adminWithdrawalsHandler from '../../server/admin-withdrawals-handler.js';
 import { issueAdminSession } from '../../server/admin.js';
 import { db, closeDatabaseForTests } from '../../server/db.js';
@@ -16,15 +15,19 @@ if (process.env.NODE_ENV !== 'test' || !process.env.E2E_DATABASE_URL || process.
 const schema = await readFile(new URL('../../db/schema.sql', import.meta.url), 'utf8');
 const makeReq = (body = {}, token = null) => ({ method: 'POST', body, headers: token ? { authorization: `Bearer ${token}` } : {} });
 const makeRes = () => ({ statusCode: 0, payload: null, setHeader() {}, hasHeader() { return false; }, end(raw) { this.payload = JSON.parse(raw); } });
-const call = async (body, token) => { const res = makeRes(); await arcadeHandler(makeReq(body, token), res); return res; };
-const authCall = async (handler, body) => { const res = makeRes(); await handler(makeReq(body), res); return res; };
+// The Arcade session handler now lives in the consolidated account dispatcher;
+// `req.query.route` is what Vercel populates for `api/account/[route].js`.
+const call = async (body, token) => { const res = makeRes(); await arcadeHandler({ ...makeReq(body, token), query: { route: 'arcade-session' } }, res); return res; };
+// Auth runs through the consolidated dispatcher; `req.query.route` is what
+// Vercel populates for `api/auth/[route].js`.
+const authCall = async (route, body) => { const res = makeRes(); await authHandler({ ...makeReq(body), query: { route } }, res); return res; };
 const neonActions = c => { let x=500,y=500; const actions=[]; for(let t=0;t<c.ticks;t++){const [sx,sy]=c.path[t],a=[Math.abs(sx-x)>10?Math.sign(sx-x):0,Math.abs(sy-y)>10?Math.sign(sy-y):0];actions.push(a);let[dx,dy]=a;if(dx&&dy){dx*=Math.SQRT1_2;dy*=Math.SQRT1_2;}x=Math.max(0,Math.min(1000,x+dx*c.speed));y=Math.max(0,Math.min(1000,y+dy*c.speed));} return actions; };
 const nbackResponses = c => c.sequence.slice(c.n).map((cell,i)=>({index:i+c.n,match:cell===c.sequence[i]}));
 
 async function login(account) {
-  const c = await authCall(challengeHandler, { wallet: account.address });
+  const c = await authCall('challenge', { wallet: account.address });
   const signature = await account.signMessage({ message: c.payload.message });
-  const v = await authCall(verifyHandler, { wallet: account.address, nonce: c.payload.nonce, signature });
+  const v = await authCall('verify', { wallet: account.address, nonce: c.payload.nonce, signature });
   assert.equal(v.statusCode, 200); return v.payload.token;
 }
 

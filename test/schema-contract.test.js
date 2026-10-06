@@ -3,8 +3,10 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const schema=readFileSync(new URL('../db/schema.sql',import.meta.url),'utf8');
-const social=readFileSync(new URL('../api/social-verification.js',import.meta.url),'utf8');
-const withdrawals=readFileSync(new URL('../api/withdrawals.js',import.meta.url),'utf8');
+const account=readFileSync(new URL('../api/account/[route].js',import.meta.url),'utf8');
+const route=name=>{const m=account.match(new RegExp('// ---- route: '+name+' ----\\n([\\s\\S]*?)// ---- end route: '+name+' ----'));if(!m)throw new Error(`route ${name} missing from api/account/[route].js`);return m[1];};
+const social=route('socialVerification');
+const withdrawals=route('withdrawals');
 const adminWithdrawals=readFileSync(new URL('../server/admin-withdrawals-handler.js',import.meta.url),'utf8');
 const identityService=readFileSync(new URL('../server/identity.js',import.meta.url),'utf8');
 const identityRouter=readFileSync(new URL('../api/identity/[route].js',import.meta.url),'utf8');

@@ -74,6 +74,11 @@
     {
       "source": "/api/btc-price",
       "destination": "/api/blockchain/btc-price"
-    }
+    },
+    { "source": "/api/balance", "destination": "/api/account/balance" },
+    { "source": "/api/referrals", "destination": "/api/account/referrals" },
+    { "source": "/api/withdrawals", "destination": "/api/account/withdrawals" },
+    { "source": "/api/social-verification", "destination": "/api/account/social-verification" },
+    { "source": "/api/arcade/session", "destination": "/api/account/arcade-session" }
   ]
 }
