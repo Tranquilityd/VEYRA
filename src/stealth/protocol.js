@@ -20,8 +20,17 @@ export const SCHEME_ID = 1;
 export const PROTOCOL_VERSION = 1;
 /** Canonical LiteForge ERC-5564 announcer (verified on-chain in Phase 2B/2C). */
 export const ANNOUNCER_ADDRESS = '0x55649E01B5Df198D18D95b5cc5051630cfD45564';
-/** ERC-5564 `Announcement` event topic (Phase 2C, read from real chain logs). */
-export const ANNOUNCEMENT_TOPIC = '0x5f0eab80282628ba6b6a9f7b4b0f4e0f8f0a5b1f4e6d4b8f0c9e6d3a1b2c3d4e';
+/**
+ * ERC-5564 `Announcement` event topic0:
+ * keccak256("Announcement(uint256,address,address,bytes,bytes)").
+ *
+ * Phase 2C read this topic off real LiteForge chain logs and Phase 3.5 re-derived it
+ * independently (Veyra's keccak, viem and @noble all agree); see
+ * `docs/VEYRA-PRIVATE-TRANSFER-ARCHITECTURE.md`. This constant previously held a
+ * placeholder that shared only its first 4 bytes with the real topic — pinned by the
+ * regression test in `test/private-transfer-crypto.test.js` so it cannot come back.
+ */
+export const ANNOUNCEMENT_TOPIC = '0x5f0eab8057630ba7676c49b4f21a0231414e79474595be8e4c432fbf6bf0f4e7';
 /** Selector for `announce(uint256,address,bytes,bytes)`. */
 export const ANNOUNCE_SELECTOR = '0x4d1f9583';
 /** LiteForge native-announcement convention: metadata is exactly the 1-byte view tag. */

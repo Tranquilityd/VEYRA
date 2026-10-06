@@ -4,6 +4,7 @@
 // primitive that matters against an independent implementation (viem / @noble /
 // node:crypto). Hand-rolled maths is never trusted on its own evidence.
 import test from 'node:test';
+import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { createDecipheriv, randomBytes, scryptSync } from 'node:crypto';
 import { privateKeyToAccount } from 'viem/accounts';
@@ -17,7 +18,7 @@ import {
 } from '../src/stealth/secp256k1.js';
 import { scrypt, BACKUP_SCRYPT_PARAMS } from '../src/stealth/scrypt.js';
 import {
-  ANNOUNCER_ADDRESS, ANNOUNCE_SELECTOR, CHAIN_ID, PROTOCOL_VERSION, SCHEME_ID,
+  ANNOUNCER_ADDRESS, ANNOUNCE_SELECTOR, ANNOUNCEMENT_TOPIC, CHAIN_ID, PROTOCOL_VERSION, SCHEME_ID,
   metaFingerprint, parseMetaAddress, buildMetaAddress, validateEphemeralPublicKey,
   validateProtocolRecord, validateResolvedRecord, findForbiddenResolvedField,
 } from '../src/stealth/protocol.js';
@@ -31,6 +32,7 @@ import { encryptBackup, decryptBackup, validateBackupEnvelope, BACKUP_FORMAT, BA
 import { signDigest, addressForPrivateKey, signNativeTransfer } from '../src/stealth/signer.js';
 
 const keyHex = (scalar) => '0x' + scalar.toString(16).padStart(64, '0');
+const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
 const secret = () => randomScalar();
 
 /* ------------------------------------------------------------------ keccak */
@@ -175,6 +177,80 @@ test('resolved records never contain a wallet address field', () => {
 test('protocol constants pin the live LiteForge deployment', () => {
   assert.equal(CHAIN_ID, 4441);
   assert.equal(SCHEME_ID, 1);
+  assert.equal(ANNOUNCER_ADDRESS, '0x55649E01B5Df198D18D95b5cc5051630cfD45564');
+  assert.equal(ANNOUNCE_SELECTOR, '0x4d1f9583');
+});
+
+/**
+ * Phase 4A.1 regression: `ANNOUNCEMENT_TOPIC` shipped as a fabricated placeholder for
+ * three phases (it shared only the first 4 bytes of the real topic0, which is why a
+ * naive prefix check would have passed). The value is now DERIVED here rather than
+ * compared to a hard-coded string, so the test proves the constant is the true
+ * ERC-5564 topic and fails the moment anything else is put back.
+ */
+test('ANNOUNCEMENT_TOPIC is the real ERC-5564 Announcement topic (derived, not pasted)', async () => {
+  const SIGNATURE = 'Announcement(uint256,address,address,bytes,bytes)';
+  const STALE_PLACEHOLDER = '0x5f0eab80282628ba6b6a9f7b4b0f4e0f8f0a5b1f4e6d4b8f0c9e6d3a1b2c3d4e';
+
+  // (1) shape: 0x + exactly 64 lowercase hex characters = 32 bytes
+  assert.equal(typeof ANNOUNCEMENT_TOPIC, 'string');
+  assert.match(ANNOUNCEMENT_TOPIC, /^0x[0-9a-f]{64}$/, 'topic0 must be 32 bytes of lowercase hex');
+  assert.equal((ANNOUNCEMENT_TOPIC.length - 2) / 2, 32);
+
+  // (2) independently derived: Veyra's own keccak over the event signature (bytes, so an
+  //     accidental UTF-8 round trip cannot pass) …
+  const { keccak256Bytes, keccak256Utf8, bytesToHex } = await import('../src/stealth/keccak.js');
+  const signatureBytes = new TextEncoder().encode(SIGNATURE);
+  assert.equal(bytesToHex(keccak256Bytes(signatureBytes)), ANNOUNCEMENT_TOPIC);
+  assert.equal(bytesToHex(keccak256Utf8(SIGNATURE)), ANNOUNCEMENT_TOPIC);
+
+  // … and a second implementation entirely (viem), so the constant is pinned to the
+  // canonical signature rather than to Veyra's keccak being wrong in the same way.
+  const { keccak256 } = await import('viem');
+  assert.equal(keccak256(signatureBytes), ANNOUNCEMENT_TOPIC);
+  assert.equal(keccak256(SIGNATURE), ANNOUNCEMENT_TOPIC, 'viem string form must agree too');
+
+  // (3) the exact known-answer value, recorded in the Phase 2/3 architecture doc.
+  assert.equal(ANNOUNCEMENT_TOPIC, '0x5f0eab8057630ba7676c49b4f21a0231414e79474595be8e4c432fbf6bf0f4e7');
+
+  // (4) it is NOT the stale placeholder (fail if anyone restores it), and the stale value
+  //     is not merely "a different valid topic": it is not the hash of anything real.
+  assert.notEqual(ANNOUNCEMENT_TOPIC, STALE_PLACEHOLDER);
+
+  // Negative controls: the derivation is sensitive to the exact signature, so a
+  // near-miss signature cannot produce (or explain) the constant.
+  const nearMisses = [
+    'Announcement(uint256,address,bytes,bytes)',          // one address parameter short
+    'Announcement(uint256,address,address,bytes)',        // metadata argument missing
+    'Announcement(uint256,address,address,bytes,bytes,uint256)', // extra argument
+    'Announcements(uint256,address,address,bytes,bytes)', // plural event name
+    'announcement(uint256,address,address,bytes,bytes)',  // wrong case
+  ];
+  for (const nearMiss of nearMisses) {
+    const derived = bytesToHex(keccak256Bytes(new TextEncoder().encode(nearMiss)));
+    assert.notEqual(derived, ANNOUNCEMENT_TOPIC, `${nearMiss} must not hash to the topic`);
+    assert.notEqual(derived, STALE_PLACEHOLDER, `${nearMiss} must not hash to the placeholder either`);
+  }
+
+  // (5) the executable source of truth contains the verified topic and NO copy of the
+  //     stale placeholder anywhere (a restored placeholder in any module fails this).
+  const source = read('src/stealth/protocol.js');
+  assert.match(source, new RegExp(ANNOUNCEMENT_TOPIC));
+  const staleScan = [];
+  for (const file of ['src/stealth/protocol.js', 'src/stealth/announcement.js', 'src/stealth/derive.js', 'src/stealth/privateTransfer.js', 'server/private-transfer.js']) {
+    assert.equal(read(file).includes(STALE_PLACEHOLDER), false, `${file} must not contain the stale placeholder`);
+    staleScan.push(file);
+  }
+  assert.equal(staleScan.length, 5);
+  // The placeholder's only distinguishing feature was its 4-byte prefix match.
+  assert.equal(ANNOUNCEMENT_TOPIC.slice(0, 10), STALE_PLACEHOLDER.slice(0, 10), 'the stale value did share this prefix (documented in the fix)');
+  assert.notEqual(ANNOUNCEMENT_TOPIC.slice(0, 10), ANNOUNCEMENT_TOPIC.slice(0, 12), 'sanity: not comparing the topic to itself');
+
+  // (6) the documented reference matches the code (no doc/code divergence).
+  const doc = read('docs/VEYRA-PRIVATE-TRANSFER-ARCHITECTURE.md');
+  assert.ok(doc.includes(ANNOUNCEMENT_TOPIC), 'the architecture doc must record this exact topic');
+
+  // (7) nothing else in the fix moved: announcer and selector are untouched.
   assert.equal(ANNOUNCER_ADDRESS, '0x55649E01B5Df198D18D95b5cc5051630cfD45564');
   assert.equal(ANNOUNCE_SELECTOR, '0x4d1f9583');
 });
