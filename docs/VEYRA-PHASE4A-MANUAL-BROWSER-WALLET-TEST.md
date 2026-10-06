@@ -1,8 +1,17 @@
 # Phase 4A — Manual browser + wallet validation of private `.veyra → .veyra` transfers
 
+> ### STOP RULE
+> **Do not perform a real private transfer during Phase 4A. That belongs to Phase 4B.**
+> Phase 4A validates the browser, the wallet connection and the network detection through
+> **read-only** diagnostics and a **dry run that cannot broadcast**. No wallet signature is
+> needed, no transaction is signed, and no zkLTC leaves the wallet. After step 11 below,
+> stop and report.
+
 **Status:** tooling and documentation complete and verified offline; **the manual run has not
 been performed yet** — it is the tester's (your) job, on a machine that can reach LitVM
-LiteForge and with a real EIP-1193 wallet.
+LiteForge and with a real EIP-1193 wallet. The Vercel Preview must be created by you
+(Section 3.1) — the deployment was **not** created by the agent, and no Preview URL is
+claimed here.
 
 **Scope discipline:** Phase 4A adds *no* product features, deploys *no* contract, moves *no*
 real funds, re-implements *no* cryptography, and weakens *no* check. It adds a clearly marked
@@ -61,7 +70,48 @@ connect — a wrong chain simply stays blocked.
 
 ## 3. Running the app
 
-### Option A — full stack (required for enroll / resolve / announcements)
+### 3.1 Option P — Vercel Preview (the Phase 4A.2 path, recommended)
+
+The Preview is deployed from this branch, **never from `main`**, and never aliased to
+production. Production is `https://veyra-tawny.vercel.app` and must stay untouched.
+
+**How to create the Preview (pick one):**
+
+| Route | Steps |
+|-------|-------|
+| **A. Vercel dashboard** | Vercel → project **veyra-tawny** → *Deployments* → **Deploy** / *Create Deployment* → branch **`arena/01a1073e-veyra`** → confirm the environment is **Preview** → Deploy. Copy the resulting `…-git-arena-01a1073e-veyra-….vercel.app` URL. |
+| **B. Git integration** | If the Vercel project has GitHub Git integration with *Preview Deployments* enabled for all branches, the push of `arena/01a1073e-veyra` (`a877544`) already queues a Preview build; find it under *Deployments*. As of this writing **no Vercel check-run or status was posted for `a877544` on GitHub**, so this route is not currently producing a deployment — use A or C. |
+| **C. Vercel CLI** | On your own machine, from a checkout of the branch: `npx vercel` (answer *Link to existing project* → **veyra-tawny**, environment **Preview**) or `npx vercel deploy` for a one-off Preview URL. No `--prod`, ever. |
+
+**Environment variables.** A Preview inherits nothing automatically. Set these for the
+**Preview** environment in Vercel → project → *Settings → Environment Variables* (values are
+yours; never commit them):
+
+| Variable | Needed for | Without it |
+|----------|-----------|------------|
+| `API_SESSION_SECRET` (≥ 32 chars) | login sessions **and** the site-entry cookie | entry gate can never verify |
+| `DATABASE_URL` | `.veyra` identity, enrollment, resolution, announcements | resolve returns `INTERNAL_ERROR` (500) |
+| `CLOUDFLARE_TURNSTILE_SECRET_KEY` (or `HCAPTCHA_SECRET_KEY` + `SITE_ENTRY_CAPTCHA_PROVIDER=hcaptcha`) | the entry CAPTCHA | cannot pass the gate |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (build-time, public) | the CAPTCHA widget in the page | widget renders "temporarily unavailable" |
+| `WALLET_CHALLENGE_DOMAIN` (optional) | cosmetic text inside the sign-in message | shows the default text; not host-validated |
+
+**The entry gate matters.** The HUD — and therefore the **PRIVATE TRANSFER** chip and the
+diagnostics panel — sits behind the site-entry verification (`/api/site-entry`). That check
+**fails closed**: with no session, no env vars or no CAPTCHA, it answers
+`{"ok":true,"verified":false}` and the app stays on the entry screen. That is correct
+security behaviour, not a bug: to reach the diagnostics in a Preview you must configure the
+four variables above (or validate wallet/chain behaviour on a local full-stack run instead).
+Do **not** ask for, and do not add, a gate bypass.
+
+**What you can validate in the Preview, by configuration level**
+
+| With… | You can validate |
+|--------|------------------|
+| No env vars | app boots, modules load, entry gate is visibly *locked* (fail-closed proof), no console/module errors |
+| Env vars but no wallet | everything above + the gate, `.veyra` identity state, resolution, test mode, diagnostics rendering |
+| Env vars + wallet | all of the above + wallet detection, chain **4441** detection, wrong-network blocking, and the read-only dry run |
+
+### Option A — full stack locally (required for enroll / resolve / announcements)
 
 ```bash
 npm install
@@ -73,7 +123,35 @@ npx vercel dev              # serves index.html + /api/* on one origin
 Open the URL `vercel dev` prints (default `http://localhost:3000`) in the browser that has
 the wallet extension.
 
-### Option B — static only (UI, wallet state, chain detection, dry run)
+### 3.2 Quick run — the exact Phase 4A.2 procedure
+
+1. Open the **Vercel Preview URL** in Chrome (desktop; or Android Chrome over the HTTPS
+   Preview host).
+2. Open the Veyra private-transfer interface: press the **PRIVATE TRANSFER** chip in the HUD
+   (or reach the panel the way Section 4 describes) — the chip is inside the play/HUD screen,
+   so complete the entry verification first if the gate is showing.
+3. Connect an EVM-compatible wallet (MetaMask or another EIP-1193 EOA wallet) and approve the
+   LiteForge network prompt in the wallet — this is a **read-only connect**, no transaction.
+4. Verify the displayed account and network information in the wallet panel and the
+   diagnostics: address, wallet type, chain.
+5. Confirm the network is identified as **chain ID 4441** (`0x1159`, LitVM LiteForge); switch
+   the wallet to another chain and confirm the panel reports **WRONG NETWORK — transfers are
+   blocked**.
+6. Enable the Phase 4A test/diagnostic mode (Section 4): `?veyra-private-test=1`, or the
+   **ENABLE TEST MODE** button in *How private transfers work*.
+7. Run the **read-only diagnostics**: press **REFRESH WALLET STATUS** and read the sections
+   (wallet, network, identity, transfer, announcement, stealth, recovery).
+8. Optionally run **RUN DRY RUN** with a recipient/amount — it resolves, derives a fresh
+   stealth address and reads the wallet, but **cannot** sign or broadcast.
+9. Verify that **no transaction was requested or broadcast**: the wallet shows **no** approval
+   prompt, and the diagnostics read `Broadcast: no` / `DRY RUN — NO TRANSACTION BROADCAST`.
+10. Verify that **no zkLTC left the wallet**: the balance is unchanged and there is no new
+    entry in the wallet's activity/history.
+11. Record any failure or error verbatim (Section 11 template), then **stop**.
+
+**Do not perform a real private transfer during Phase 4A. That belongs to Phase 4B.**
+
+### Option B — static only locally (UI, wallet state, chain detection, dry run)
 
 ```bash
 npm run build:static
@@ -302,8 +380,19 @@ state change).
 
 ## 10. Known limitations of this phase
 
+* **No Preview deployment was created by the agent** (no Vercel credentials and no network
+  egress to Vercel from the build environment) and no Preview URL is claimed anywhere in this
+  document — create it yourself with Section 3.1 and paste the URL into your report.
+* **The Vercel checks performed for Phase 4A.2 were static/offline**: the build was produced
+  and served locally, all 13 serverless functions were confirmed to cold-start with no
+  environment variables, the API router/auth/method/same-origin behaviour was exercised with
+  no env configured (401/404/405/500 `INTERNAL_ERROR`, `Cache-Control: no-store`, no stack or
+  secret in any body), the entry gate was confirmed to fail closed, the module graph was
+  confirmed complete in the built output, and the built client was scanned for secret shapes.
+  None of that is a substitute for opening the real Preview in a real browser.
 * The **backend must be reachable** for enroll / resolve / announcements; without it only
-  wallet, chain-state and dry-run behaviour can be validated (Option B).
+  wallet, chain-state and dry-run behaviour can be validated (Option B), and in a Preview the
+  entry gate will also stay locked (Section 3.1).
 * The full flow requires **two accounts and testnet funds for Alice**; sourcing testnet
   zkLTC is outside Veyra's code (use the Phase 2E funding source).
 * Phase 4A does not validate a live on-chain payment end-to-end, does not spend from a
