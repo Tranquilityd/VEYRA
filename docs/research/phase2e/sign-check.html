@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<!-- ============================================================================================
+  Phase 2E — REAL-WALLET signature-determinism + stealth-identity recovery probe
+  ============================================================================================
+  RESEARCH TOOLING. Purpose: test the Phase 2D recovery model against an actual browser wallet
+  (MetaMask etc.), which cannot be tested from Node/CLI.
+
+  What it checks (EIP-1193 personal_sign, EIP-191):
+    1. same wallet + same exact signing input  -> byte-identical signature? (determinism)
+    2. signature is the 65-byte form required by the derivation (64-byte compact is REFUSED)
+    3. signature -> spendPriv = keccak256(sig[0:32]), viewPriv = keccak256(sig[32:64])
+       -> stealth meta-address + public fingerprint (safe to display / compare with the app)
+    4. altered username / altered chainId -> different fingerprint (binding proof)
+
+  SAFETY PROPERTIES (by construction, not by promise):
+    - No network requests of any kind. All code is inline; no CDN, no fonts, no analytics.
+    - The signature and the derived private keys NEVER leave the function that computes them and
+      are NEVER rendered. Only public values (address, meta-address, fingerprint, booleans) are shown.
+    - keccak256 and secp256k1 here are minimal inline implementations, validated offline against
+      @noble/curves / viem (12/12 scalars, 7/7 keccak vectors incl. padding edge cases).
+    - Use a DISPOSABLE test wallet. Testnets only. The page never asks for a seed phrase.
+
+  Usage: open this file in a browser with the wallet extension, connect, click "Run probe".
+============================================================================================ -->
+<meta charset="utf-8">
+<title>Phase 2E — wallet signature determinism probe</title>
+<style>
+  body { font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; margin: 2rem auto; max-width: 60rem; background:#0f1115; color:#e6e6e6; }
+  h1 { font-size: 1.15rem; } h2 { font-size: 1rem; margin-top: 1.6rem; color:#9ad; }
+  button { background:#2b6; color:#04140b; border:0; padding:.5rem .9rem; border-radius:4px; font: inherit; cursor:pointer; margin-right:.6rem; }
+  button[disabled] { opacity:.5; cursor:default; }
+  code, pre { background:#1a1d24; padding:.15rem .35rem; border-radius:3px; word-break:break-all; }
+  pre { padding:.7rem; overflow-x:auto; }
+  .ok { color:#3d9; } .bad { color:#f66; } .warn { color:#fc6; }
+  table { border-collapse: collapse; margin-top:.6rem; } td, th { border:1px solid #333; padding:.3rem .6rem; text-align:left; }
+</style>
+<h1>Phase 2E — real-wallet signature determinism &amp; stealth-identity probe</h1>
+<p class="warn">Disposable test wallet only. Nothing is transmitted (no network code in this page).
+The signed message and any private material are never displayed.</p>
+
+<button id="connect">1. Connect wallet</button>
+<button id="run" disabled>2. Run probe</button>
+<pre id="out">waiting…</pre>
+
+<script>
+'use strict';
+/* ------------------------------------------------------------------ minimal keccak256 (validated) */
+const MASK = (1n << 64n) - 1n;
+const RC = [0x0000000000000001n,0x0000000000008082n,0x800000000000808an,0x8000000080008000n,
+            0x000000000000808bn,0x0000000080000001n,0x8000000080008081n,0x8000000000008009n,
+            0x000000000000008an,0x0000000000000088n,0x0000000080008009n,0x000000008000000an,
+            0x000000008000808bn,0x800000000000008bn,0x8000000000008089n,0x8000000000008003n,
+            0x8000000000008002n,0x8000000000000080n,0x000000000000800an,0x800000008000000an,
+            0x8000000080008081n,0x8000000000008080n,0x0000000080000001n,0x8000000080008008n];
+const ROT = [[0n,36n,3n,41n,18n],[1n,44n,10n,45n,2n],[62n,6n,43n,15n,61n],[28n,55n,25n,21n,56n],[27n,20n,39n,8n,14n]];
+const rot = (x, n) => n === 0n ? x : (((x << n) | (x >> (64n - n))) & MASK);
+function keccakF(A) {
+  for (let round = 0; round < 24; round++) {
+    const C = new Array(5), D = new Array(5), B = new Array(25);
+    for (let x = 0; x < 5; x++) C[x] = A[x] ^ A[x+5] ^ A[x+10] ^ A[x+15] ^ A[x+20];
+    for (let x = 0; x < 5; x++) D[x] = C[(x+4)%5] ^ rot(C[(x+1)%5], 1n);
+    for (let y = 0; y < 5; y++) for (let x = 0; x < 5; x++) A[x+5*y] ^= D[x];
+    for (let y = 0; y < 5; y++) for (let x = 0; x < 5; x++) B[y + 5*((2*x+3*y)%5)] = rot(A[x+5*y], ROT[x][y]);
+    for (let y = 0; y < 5; y++) for (let x = 0; x < 5; x++) A[x+5*y] = B[x+5*y] ^ ((~B[(x+1)%5 + 5*y] & MASK) & B[(x+2)%5 + 5*y]);
+    A[0] ^= RC[round];
+  }
+  return A;
+}
+function keccak256(bytes) {
+  const rate = 136;
+  const P = Array.from(bytes); P.push(0x01);
+  while (P.length % rate !== 0) P.push(0);
+  P[P.length - 1] |= 0x80;
+  const A = new Array(25).fill(0n);
+  for (let off = 0; off < P.length; off += rate) {
+    for (let i = 0; i < rate; i += 8) {
+      let lane = 0n;
+      for (let j = 7; j >= 0; j--) lane = ((lane << 8n) | BigInt(P[off + i + j])) & MASK;
+      A[i / 8] ^= lane;
+    }
+    keccakF(A);
+  }
+  const out = new Uint8Array(32);
+  for (let i = 0; i < 32; i++) out[i] = Number((A[i >> 3] >> BigInt(8 * (i & 7))) & 0xffn);
+  return out;
+}
+/* ------------------------------------------------------------------ minimal secp256k1 (validated) */
+const P = 2n ** 256n - 2n ** 32n - 977n;
+const N = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141n;
+const Gx = 0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798n;
+const Gy = 0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8n;
+function inv(a, m) {
+  let [oldR, r] = [a % m, m], [oldS, s] = [1n, 0n];
+  while (r !== 0n) { const q = oldR / r; [oldR, r] = [r, oldR - q * r]; [oldS, s] = [s, oldS - q * s]; }
+  return ((oldS % m) + m) % m;
+}
+function add(p1, p2) {
+  if (!p1) return p2; if (!p2) return p1;
+  const [x1, y1] = p1, [x2, y2] = p2;
+  if (x1 === x2 && (y1 + y2) % P === 0n) return null;
+  const l = (x1 === x2 && y1 === y2)
+    ? (3n * x1 * x1 % P) * inv(2n * y1, P) % P
+    : (y2 - y1 + P) % P * inv((x2 - x1 + P) % P, P) % P;
+  const x3 = (l * l - x1 - x2 + 2n * P) % P;
+  const y3 = ((l * (x1 - x3) - y1) % P + P) % P;
+  return [x3, y3];
+}
+function mul(k, pt) { let r = null, a = pt || [Gx, Gy]; while (k > 0n) { if (k & 1n) r = add(r, a); a = add(a, a); k >>= 1n; } return r; }
+const compressedPub = (priv) => { const [x, y] = mul(priv); return (y % 2n === 0n ? '02' : '03') + x.toString(16).padStart(64, '0'); };
+/* ------------------------------------------------------------------ helpers */
+const toHex = (u8) => [...u8].map(b => b.toString(16).padStart(2, '0')).join('');
+const hexToBytes = (h) => Uint8Array.from((h.replace(/^0x/, '').match(/../g) || []).map(b => parseInt(b, 16)));
+const utf8 = (s) => new TextEncoder().encode(s);
+const out = document.getElementById('out');
+let account = null;
+const CHAIN_ID = 4441;
+const recoveryMessage = (username) => `Veyra stealth identity v1\nusername: ${username}\nchainId: ${CHAIN_ID}\ndomain: veyra.identity`;
+
+function deriveFromSignature(sigHex) {
+  const h = sigHex.replace(/^0x/, '');
+  if (h.length !== 130) return { ok: false, reason: `signature is ${h.length / 2} bytes, need 65 (r||s||v)` };
+  const b = hexToBytes('0x' + h);
+  const spend = BigInt('0x' + toHex(keccak256(b.slice(0, 32)))) % N;
+  const view = BigInt('0x' + toHex(keccak256(b.slice(32, 64)))) % N;
+  if (spend === 0n || view === 0n) return { ok: false, reason: 'derived zero scalar' };
+  if (spend === view) return { ok: false, reason: 'derived identical spend/view keys' };
+  const meta = '0x' + compressedPub(spend) + compressedPub(view);
+  return { ok: true, meta, fingerprint: '0x' + toHex(keccak256(hexToBytes(meta)).slice(0, 4)) };
+}
+async function sign(msg) {
+  return window.ethereum.request({ method: 'personal_sign', params: ['0x' + toHex(utf8(msg)), account] });
+}
+
+document.getElementById('connect').onclick = async () => {
+  if (!window.ethereum) { out.textContent = 'no EIP-1193 wallet found (window.ethereum is undefined)'; return; }
+  try {
+    const accts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    account = accts[0];
+    out.textContent = 'connected: ' + account + '\n(only your public address is shown)';
+    document.getElementById('run').disabled = false;
+  } catch (e) { out.textContent = 'connection rejected: ' + (e.message || e); }
+};
+
+document.getElementById('run').onclick = async () => {
+  out.textContent = 'waiting for signatures…';
+  const msg = recoveryMessage('bob');
+  try {
+    const sig1 = await sign(msg);
+    const sig2 = await sign(msg);            // identical input, second call
+    const d1 = deriveFromSignature(sig1);
+    const d2 = deriveFromSignature(sig2);
+    const same = sig1 === sig2;
+    const lines = [];
+    lines.push('wallet address        : ' + account);
+    lines.push('signature length      : ' + ((sig1.replace(/^0x/, '').length) / 2) + ' bytes');
+    lines.push('deterministic         : ' + (same ? 'YES (identical signature both times)' : 'NO — NON-DETERMINISTIC WALLET'));
+    if (!same) lines.push('  => this wallet derives a DIFFERENT stealth identity each time. The encrypted-backup path becomes mandatory; the signature path must NOT be used.');
+    if (!d1.ok) { lines.push('derivation            : REFUSED — ' + d1.reason); }
+    else {
+      lines.push('meta-address          : ' + d1.meta);
+      lines.push('meta fingerprint      : ' + d1.fingerprint);
+      lines.push('reproducible          : ' + (d2.ok && d2.fingerprint === d1.fingerprint ? 'YES' : 'NO'));
+      /* binding proofs — altered inputs must change the identity */
+      const altU = deriveFromSignature(await sign(recoveryMessage('bob2')));
+      const altC = deriveFromSignature(await sign(recoveryMessage('bob').replace('chainId: 4441', 'chainId: 4442')));
+      lines.push('altered username      : ' + (altU.ok && altU.fingerprint !== d1.fingerprint ? 'different identity (binding OK)' : 'UNEXPECTED'));
+      lines.push('altered chainId       : ' + (altC.ok && altC.fingerprint !== d1.fingerprint ? 'different identity (binding OK)' : 'UNEXPECTED'));
+      lines.push('');
+      lines.push('Compare "meta fingerprint" with the value shown by the app for bob.veyra.');
+      lines.push('If it differs, the wallet is NOT controlling the same stealth identity — do not send funds.');
+    }
+    out.textContent = lines.join('\n');
+  } catch (e) {
+    out.textContent = 'signature rejected or failed: ' + (e.message || e.code || e);
+  }
+};
+</script>

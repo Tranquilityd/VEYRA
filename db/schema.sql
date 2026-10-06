@@ -12,6 +12,46 @@ CREATE TABLE IF NOT EXISTS users (
 );
 ALTER TABLE users ADD COLUMN IF NOT EXISTS social_verified_at timestamptz;
 
+-- Phase 1 — permanent .veyra identity layer.
+-- Purely additive and nullable: existing wallet accounts keep working with no
+-- username, and `users.id` / `users.wallet_address` remain the immutable
+-- identifiers. A username is permanently bound to one existing user row and is
+-- never reassigned.
+--   username            canonical bare body, e.g. `lester` (never `lester.veyra`)
+--   username_normalized lowercase uniqueness key (the final authority)
+--   username_created_at claim timestamp; NULL means "no username yet"
+ALTER TABLE users ADD COLUMN IF NOT EXISTS username text;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS username_normalized text;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS username_created_at timestamptz;
+CREATE UNIQUE INDEX IF NOT EXISTS users_username_normalized_unique
+  ON users(username_normalized) WHERE username_normalized IS NOT NULL;
+-- Database-level format authority. Mirrors USERNAME_PATTERN in
+-- src/identity/username.js: starts with a letter, ends with a letter or number,
+-- lowercase letters/numbers/underscores only, and never two underscores in a row.
+ALTER TABLE users DROP CONSTRAINT IF EXISTS users_username_normalized_format;
+ALTER TABLE users ADD CONSTRAINT users_username_normalized_format CHECK (
+  username_normalized IS NULL OR (
+    username_normalized ~ '^[a-z][a-z0-9]*(_[a-z0-9]+)*$'
+    AND char_length(username_normalized) BETWEEN 3 AND 20
+  )
+);
+-- A named username is always stored with its normalized form and claim time.
+ALTER TABLE users DROP CONSTRAINT IF EXISTS users_username_pairing;
+ALTER TABLE users ADD CONSTRAINT users_username_pairing CHECK (
+  (username IS NULL AND username_normalized IS NULL AND username_created_at IS NULL)
+  OR (username IS NOT NULL AND username_normalized IS NOT NULL AND username_created_at IS NOT NULL)
+);
+
+-- Database-backed identity rate limits (mirrors admin_login_attempts). IPs are
+-- stored only as a keyed HMAC, never in raw form.
+CREATE TABLE IF NOT EXISTS identity_attempts (
+  id bigserial PRIMARY KEY,
+  ip_hash text NOT NULL,
+  action text NOT NULL CHECK (action IN ('availability','lookup','claim')),
+  attempted_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS identity_attempts_rate ON identity_attempts(ip_hash, action, attempted_at DESC);
+
 CREATE TABLE IF NOT EXISTS auth_challenges (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(), wallet_address text NOT NULL,
   nonce_hash text NOT NULL, message text NOT NULL,
@@ -191,3 +231,89 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 );
 CREATE INDEX IF NOT EXISTS audit_time ON audit_logs(created_at DESC);
 CREATE INDEX IF NOT EXISTS audit_entity ON audit_logs(entity_type, entity_id);
+
+-- ---------------------------------------------------------------------------
+-- Phase 3: private (.veyra -> .veyra) stealth transfers.
+--
+-- These tables hold PUBLIC protocol material only. There is deliberately no
+-- column for a spending/viewing/stealth private key, no seed, no mnemonic and
+-- no wallet address: the backend never receives, derives or stores any of them.
+-- `private_transfer_announcements` and `private_transfer_payments` also carry no
+-- recipient identity, so the database cannot be used to build a transfer graph.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS private_transfer_identities (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+  protocol_version integer NOT NULL CHECK (protocol_version = 1),
+  scheme_id integer NOT NULL CHECK (scheme_id = 1),
+  spending_public_key text NOT NULL CHECK (spending_public_key ~ '^0x(02|03)[0-9a-f]{64}$'),
+  viewing_public_key text NOT NULL CHECK (viewing_public_key ~ '^0x(02|03)[0-9a-f]{64}$'),
+  meta_address text NOT NULL CHECK (meta_address ~ '^0x(02|03)[0-9a-f]{64}(02|03)[0-9a-f]{64}$'),
+  fingerprint text NOT NULL CHECK (fingerprint ~ '^[0-9a-f]{8}$'),
+  sisk_public_key text NOT NULL CHECK (sisk_public_key ~ '^0x(02|03)[0-9a-f]{64}$'),
+  enrollment_signature text NOT NULL CHECK (enrollment_signature ~ '^0x[0-9a-f]{130}$'),
+  wallet_class text NOT NULL DEFAULT 'eoa' CHECK (wallet_class IN ('eoa','contract')),
+  status text NOT NULL DEFAULT 'active' CHECK (status IN ('active','revoked','pending')),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT private_transfer_keys_distinct CHECK (spending_public_key <> viewing_public_key)
+);
+CREATE INDEX IF NOT EXISTS private_transfer_identities_meta ON private_transfer_identities(meta_address);
+CREATE INDEX IF NOT EXISTS private_transfer_identities_fingerprint ON private_transfer_identities(fingerprint);
+
+-- Public announcement ledger (mirror of what is already on-chain, never a filter
+-- surface for a single user). No user_id: the scan endpoint must not be an oracle.
+CREATE TABLE IF NOT EXISTS private_transfer_announcements (
+  id bigserial PRIMARY KEY,
+  chain_id integer NOT NULL DEFAULT 4441 CHECK (chain_id = 4441),
+  scheme_id integer NOT NULL DEFAULT 1 CHECK (scheme_id = 1),
+  stealth_address text NOT NULL CHECK (stealth_address ~ '^0x[0-9a-f]{40}$'),
+  ephemeral_public_key text NOT NULL CHECK (ephemeral_public_key ~ '^0x(02|03)[0-9a-f]{64}$'),
+  metadata text NOT NULL CHECK (metadata ~ '^0x[0-9a-f]{2}([0-9a-f]{2})*$'),
+  transaction_hash text NOT NULL UNIQUE CHECK (transaction_hash ~ '^0x[0-9a-f]{64}$'),
+  block_number numeric(30,0),
+  submitted_by uuid REFERENCES users(id) ON DELETE SET NULL,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS private_transfer_announcements_recent ON private_transfer_announcements(created_at DESC, id DESC);
+
+-- Sender-side reconciliation for a payment that already settled on-chain. Stores
+-- no recipient identity: `stealth_address`/`ephemeral_public_key` are public
+-- protocol values, and the row exists so an announcement can be republished
+-- WITHOUT ever re-sending zkLTC.
+CREATE TABLE IF NOT EXISTS private_transfer_payments (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  chain_id integer NOT NULL DEFAULT 4441 CHECK (chain_id = 4441),
+  scheme_id integer NOT NULL DEFAULT 1 CHECK (scheme_id = 1),
+  protocol_version integer NOT NULL DEFAULT 1 CHECK (protocol_version = 1),
+  stealth_address text NOT NULL CHECK (stealth_address ~ '^0x[0-9a-f]{40}$'),
+  ephemeral_public_key text NOT NULL CHECK (ephemeral_public_key ~ '^0x(02|03)[0-9a-f]{64}$'),
+  view_tag text NOT NULL CHECK (view_tag ~ '^0x[0-9a-f]{2}$'),
+  amount_atomic numeric(78,0) NOT NULL CHECK (amount_atomic > 0),
+  payment_tx_hash text CHECK (payment_tx_hash ~ '^0x[0-9a-f]{64}$'),
+  announcement_tx_hash text CHECK (announcement_tx_hash ~ '^0x[0-9a-f]{64}$'),
+  status text NOT NULL DEFAULT 'payment_submitted'
+    CHECK (status IN ('payment_submitted','payment_confirming','payment_confirmed','announcement_submitting','announcement_confirmed','completed','failed')),
+  failure_reason text,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS private_transfer_payments_user_time ON private_transfer_payments(user_id, created_at DESC);
+CREATE UNIQUE INDEX IF NOT EXISTS private_transfer_payments_tx_unique ON private_transfer_payments(payment_tx_hash) WHERE payment_tx_hash IS NOT NULL;
+CREATE INDEX IF NOT EXISTS private_transfer_payments_pending ON private_transfer_payments(status) WHERE status IN ('payment_confirmed','announcement_submitting');
+
+-- Enumeration-sensitive endpoints (resolve, announcements) get their own limiter
+-- so the Phase 1 identity limiter table keeps its original action whitelist.
+CREATE TABLE IF NOT EXISTS private_transfer_attempts (
+  id bigserial PRIMARY KEY,
+  ip_hash text NOT NULL,
+  action text NOT NULL CHECK (action IN ('resolve','announcements','enroll','payments')),
+  attempted_at timestamptz NOT NULL DEFAULT now()
+);
+-- Widening the action whitelist for databases created before 'payments' existed. Safe to
+-- re-run: the constraint is dropped and re-added with the current allowed set.
+ALTER TABLE private_transfer_attempts DROP CONSTRAINT IF EXISTS private_transfer_attempts_action_check;
+ALTER TABLE private_transfer_attempts ADD CONSTRAINT private_transfer_attempts_action_check
+  CHECK (action IN ('resolve','announcements','enroll','payments'));
+CREATE INDEX IF NOT EXISTS private_transfer_attempts_rate ON private_transfer_attempts(ip_hash, action, attempted_at DESC);
