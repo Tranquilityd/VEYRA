@@ -3,7 +3,6 @@ import { EventBus } from './core/EventBus.js';
 import { StateMachine } from './core/StateMachine.js';
 import { Storage } from './core/Storage.js';
 import { InputManager } from './core/InputManager.js';
-import { ReferralSystem } from './systems/ReferralSystem.js';
 import { GameRegistry } from './systems/GameRegistry.js';
 import { InteractionSystem } from './systems/InteractionSystem.js';
 import { Camera } from './world/Camera.js';
@@ -98,17 +97,6 @@ export function runTests(game) {
     assert(game.games.list().length >= 2, 'placeholder games registered');
   });
 
-  t('ReferralSystem code + redeem stub', () => {
-    const ref = new ReferralSystem(new EventBus());
-    assert(/^VEYRA-[A-Z0-9]{4}$/.test(ref.getCode()), 'code format');
-    assert(ref.getCode() === ref.getCode(), 'stable code');
-    const bad = ref.redeem('hello');
-    assert(bad.ok === false && bad.message.length > 0);
-    const own = ref.redeem(ref.getCode());
-    assert(own.ok === false && /own/.test(own.message));
-    const other = ref.redeem('veyra-zzz9');
-    assert(other.ok === false, 'no rewards in Phase 1');
-  });
 
   t('InputManager.computeAxis pure', () => {
     const a1 = InputManager.computeAxis(new Set(['KeyW', 'KeyD']), { x: 0, y: 0 });

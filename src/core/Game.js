@@ -8,7 +8,7 @@ import { SaveSystem } from './SaveSystem.js';
 import { UIManager } from '../ui/UIManager.js';
 import { initOrientationGuard } from '../ui/OrientationGuard.js';
 import { LitvmWalletSession } from '../systems/LitvmWalletSession.js';
-import { ReferralSystem } from '../systems/ReferralSystem.js';
+import { VeyraIdentity } from '../systems/VeyraIdentity.js';
 import { GameRegistry } from '../systems/GameRegistry.js';
 import { TransitionSystem } from '../systems/TransitionSystem.js';
 import { Lighting } from '../visuals/Lighting.js';
@@ -21,6 +21,9 @@ import { GameOverlay } from '../ui/GameOverlay.js';
 import { WalletPanel } from '../ui/WalletPanel.js';
 import { ArcadeBalancePanel } from '../ui/ArcadeBalancePanel.js';
 import { CityMinimap } from '../ui/CityMinimap.js';
+import { IdentityPanel } from '../ui/IdentityPanel.js';
+import { PrivateTransferSession } from '../systems/PrivateTransferSession.js';
+import { PrivateTransferPanel } from '../ui/PrivateTransferPanel.js';
 import { CASINO_GAMES } from '../games/casinoLogic.js';
 import { ARCADE_GAMES } from '../games/arcadeLogic.js';
 import { authorizeSiteEntryTransition } from '../systems/siteEntryAuthorization.js';
@@ -33,7 +36,8 @@ export class Game {
     this.audio = new AudioManager(this);
     this.input = new InputManager(this);
     this.walletSession = new LitvmWalletSession(this.events);
-    this.referral = new ReferralSystem(this.events);
+    this.identity = new VeyraIdentity(this.events);   // Phase 1: permanent .veyra identity
+    this.privateTransfer = new PrivateTransferSession(this);   // Phase 3: private .veyra transfers (client-side crypto)
     this.games = new GameRegistry(this.events);
     this.save = new SaveSystem(this);
     this.lighting = new Lighting();
@@ -44,6 +48,8 @@ export class Game {
     this.walletPanel = new WalletPanel(this);
     this.arcadeBalancePanel = new ArcadeBalancePanel(this);
     this.minimap = new CityMinimap(this);
+    this.identityPanel = new IdentityPanel(this);
+    this.privateTransferPanel = new PrivateTransferPanel(this);
     this.dpr = 1;
     this.view = { w: 800, h: 600 };
     this.debug = ['localhost', '127.0.0.1'].includes(location.hostname) && new URLSearchParams(location.search).has('debug');
@@ -96,6 +102,15 @@ export class Game {
     this.loop.start();
     this.states.set('boot');
     this.events.on('state:changed', () => { this.spriteCount = SpriteCache.count(); });
+    // Phase 1: invite an authenticated player to claim a permanent .veyra username.
+    // Non-blocking — the player can dismiss it and keep playing. Evaluated both when
+    // the identity loads and when a playable state is reached, so a wallet connected
+    // during boot is still invited once the game is ready.
+    this.events.on('identity:changed', () => this.identityPanel.maybeAutoPrompt());
+    // Private transfers stay entirely opt-in: the chip reflects state, nothing auto-opens.
+    this.events.on('identity:changed', () => this.privateTransferPanel?.refresh?.().catch(() => {}));
+    this.events.on('litvm:wallet', () => this.privateTransferPanel?.refresh?.().catch(() => {}));
+    this.events.on('state:changed', () => this.identityPanel.maybeAutoPrompt());
   }
 
   resize() {

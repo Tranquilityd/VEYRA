@@ -7,8 +7,7 @@ import {
   parseEther, recoverTypedDataAddress,
 } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
-import challengeHandler from '../../api/auth/challenge.js';
-import verifyHandler from '../../api/auth/verify.js';
+import authHandler from '../../api/auth/[route].js';
 import casinoSessionHandler from '../../api/casino/session.js';
 import transactionHandler from '../../server/blockchain-transactions-handler.js';
 import claimsHandler from '../../server/casino-claims-handler.js';
@@ -36,6 +35,9 @@ const makeRes = () => {
   return { statusCode: 0, payload: null, setHeader(k, v) { headers.set(k.toLowerCase(), v); }, hasHeader(k) { return headers.has(k.toLowerCase()); }, end(raw) { this.payload = JSON.parse(raw); } };
 };
 const call = async (handler, method, body, token) => { const res = makeRes(); await handler(makeReq(method, body, token), res); return res; };
+// Auth runs through the consolidated dispatcher; `req.query.route` is what
+// Vercel populates for `api/auth/[route].js`.
+const authCall = async (route, body) => { const res = makeRes(); await authHandler({ ...makeReq('POST', body), query: { route } }, res); return res; };
 const eventLog = (eventName, indexedArgs, dataTypes, dataValues) => ({
   address: casino,
   topics: encodeEventTopics({ abi, eventName, args: indexedArgs }),
@@ -75,14 +77,14 @@ test('isolated database-backed casino lifecycle', async () => {
 
   try {
     // Authentication: real challenge, signature verification, token, and replay rejection.
-    const challenge = await call(challengeHandler, 'POST', { wallet: player.address });
+    const challenge = await authCall('challenge', { wallet: player.address });
     assert.equal(challenge.statusCode, 200);
     const loginSignature = await player.signMessage({ message: challenge.payload.message });
-    const authenticated = await call(verifyHandler, 'POST', { wallet: player.address, nonce: challenge.payload.nonce, signature: loginSignature });
+    const authenticated = await authCall('verify', { wallet: player.address, nonce: challenge.payload.nonce, signature: loginSignature });
     assert.equal(authenticated.statusCode, 200);
     const token = authenticated.payload.token;
     assert.ok(token);
-    const replay = await call(verifyHandler, 'POST', { wallet: player.address, nonce: challenge.payload.nonce, signature: loginSignature });
+    const replay = await authCall('verify', { wallet: player.address, nonce: challenge.payload.nonce, signature: loginSignature });
     assert.equal(replay.statusCode, 401);
     assert.equal((await sql`SELECT count(*)::int AS n FROM users`)[0].n, 1);
     assert.ok((await sql`SELECT used_at FROM auth_challenges`)[0].used_at);

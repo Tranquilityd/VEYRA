@@ -1,0 +1,130 @@
+/* Veyra — Phase 3: private transfer panel + HUD chip.
+   Reuses the established Veyra tokens (`--veyra-*` from styles/veyra-identity.css)
+   so the surface reads as part of the same world as the identity layer. */
+
+/* ----------------------------------------------------------------- HUD chip */
+.private-chip{color:#fff;border:1px solid rgba(122,107,178,.62);background:linear-gradient(110deg,rgba(9,5,30,.88),rgba(24,8,46,.74));box-shadow:0 7px 22px rgba(0,0,0,.34),inset 0 1px rgba(53,224,255,.06)}
+.private-chip .balance-copy small{color:#b9d9ff}
+.private-chip .balance-copy b{color:#e9f6ff}
+.private-chip .balance-copy em{color:#8fb6d8}
+.private-chip:hover{border-color:rgba(53,224,255,.5);box-shadow:0 8px 26px rgba(0,0,0,.38),0 0 14px rgba(53,224,255,.18)}
+.private-chip[data-state='ready']{border-color:rgba(53,224,255,.55)}
+.private-chip[data-state='ready'] .balance-copy b{color:#35e0ff}
+.private-chip[data-state='action'] .balance-copy b{color:#ffd88a}
+.private-chip[data-state='error']{border-color:rgba(216,0,39,.6)}
+.private-chip[data-state='error'] .balance-copy b{color:#ff9a8a}
+.private-chip .private-badge{filter:drop-shadow(0 3px 4px rgba(0,0,0,.5))}
+
+/* ------------------------------------------------------------------ overlay */
+.private-overlay{position:fixed;inset:0;z-index:79;display:flex;align-items:center;justify-content:center;padding:14px;box-sizing:border-box;background:radial-gradient(ellipse at 50% 26%,rgba(8,0,195,.3),transparent 62%),rgba(3,2,12,.84);backdrop-filter:blur(7px);animation:privateFade .22s ease-out}
+.private-overlay[hidden]{display:none}
+.private-card{position:relative;width:min(96vw,600px);max-height:min(92vh,720px);overflow:auto;padding:20px 18px 18px;box-sizing:border-box;border-radius:20px;border:1px solid rgba(122,107,178,.5);background:linear-gradient(165deg,#0a0728 0%,#0f0624 48%,#07040f 100%);box-shadow:0 26px 80px rgba(0,0,0,.74),inset 0 1px rgba(53,224,255,.07);color:#f2eeff;animation:privateRise .28s cubic-bezier(.2,.85,.3,1);-webkit-overflow-scrolling:touch}
+.private-card:before{content:'';position:absolute;inset:0;border-radius:20px;pointer-events:none;background:linear-gradient(180deg,rgba(53,224,255,.05),transparent 32%)}
+.private-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.private-eyebrow{margin:0 0 6px;font-family:var(--veyra-condensed);font-weight:800;font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:#35e0ff}
+.private-title{margin:0 0 6px;font-family:var(--veyra-display);font-style:italic;font-weight:950;font-size:clamp(19px,4.4vw,26px);line-height:1.06;letter-spacing:.03em;background:linear-gradient(180deg,#dcfaff 0%,#35e0ff 52%,#7b5bff 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.private-close{flex:0 0 auto;width:34px;height:34px;border-radius:50%;border:1px solid rgba(122,107,178,.5);background:rgba(10,6,30,.7);color:#cfc7ee;font-size:14px;line-height:1;cursor:pointer}
+.private-close:hover{border-color:rgba(53,224,255,.6);color:#fff}
+.private-lead{margin:0 0 12px;font-family:var(--veyra-clean);font-size:12.5px;line-height:1.55;color:#c4c0e2}
+.private-status{min-height:18px;margin:0 0 12px;font-family:var(--veyra-clean);font-weight:700;font-size:12px;line-height:1.5;color:#9fb6d4}
+.private-status[data-state='completed']{color:#8bf7a8}
+.private-status[data-state='failed']{color:#ff9a8a}
+.private-status[data-state='announcement_submitting'],.private-status[data-state='payment_confirming']{color:#ffd88a}
+
+/* ----------------------------------------------------------------- sections */
+.private-section{margin:0 0 14px;padding:13px 13px 12px;border-radius:15px;border:1px solid rgba(122,107,178,.3);background:linear-gradient(160deg,rgba(9,6,28,.72),rgba(14,7,32,.5))}
+.private-section-title{margin:0 0 8px;font-family:var(--veyra-condensed);font-weight:800;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:#d9d0f5}
+.private-fields{display:grid;grid-template-columns:1.4fr 1fr;gap:9px}
+@media (max-width:430px){.private-fields{grid-template-columns:1fr}}
+.private-field{display:flex;flex-direction:column;gap:5px;margin:0 0 8px}
+.private-label{font-family:var(--veyra-clean);font-weight:700;font-size:10.5px;letter-spacing:.06em;color:#9c93c4}
+.private-input,.private-output{width:100%;box-sizing:border-box;padding:10px 12px;border-radius:12px;border:1.5px solid rgba(122,107,178,.5);background:rgba(5,3,18,.88);color:#fff;font-family:var(--veyra-condensed);font-weight:800;font-size:15px;letter-spacing:.03em;box-shadow:inset 0 2px 10px rgba(0,0,0,.5)}
+.private-input:focus,.private-output:focus{outline:0;border-color:#35e0ff;box-shadow:inset 0 2px 10px rgba(0,0,0,.5),0 0 0 3px rgba(53,224,255,.14)}
+.private-output{margin-top:8px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;font-weight:500;line-height:1.5;resize:vertical}
+.private-note{margin:6px 2px;font-family:var(--veyra-clean);font-size:11.5px;line-height:1.55;color:#a9a1cc}
+.private-note[data-state='warn']{color:#ffc46b}
+.private-note[data-state='ok']{color:#8bf7a8}
+.private-subnote{margin:6px 2px 0;font-family:var(--veyra-clean);font-size:10.5px;line-height:1.55;color:#7d76a0}
+.private-warning{margin:9px 2px 0;font-family:var(--veyra-clean);font-size:10.5px;line-height:1.55;color:#ffbd6b}
+
+/* ------------------------------------------------------------------ actions */
+.private-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.private-btn{flex:1 1 auto;min-height:42px;padding:10px 13px;border-radius:13px;border:1.5px solid rgba(122,107,178,.55);background:linear-gradient(160deg,rgba(14,9,38,.9),rgba(9,5,24,.9));color:#ded7ff;font-family:var(--veyra-condensed);font-weight:800;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:border-color .18s,transform .12s,box-shadow .18s}
+.private-btn:hover:not(:disabled){border-color:rgba(53,224,255,.55);box-shadow:0 0 14px rgba(53,224,255,.16)}
+.private-btn:active:not(:disabled){transform:translateY(1px)}
+.private-btn:disabled{opacity:.45;cursor:not-allowed}
+.private-btn-primary{border-color:rgba(53,224,255,.6);color:#062b33;background:linear-gradient(160deg,#bff4ff,#35e0ff 62%,#1fa7d8);text-shadow:0 1px rgba(255,255,255,.35)}
+
+/* -------------------------------------------------------------------- lists */
+.private-list{list-style:none;margin:9px 0 0;padding:0;display:flex;flex-direction:column;gap:7px}
+.private-list-empty{margin:0;font-family:var(--veyra-clean);font-size:11px;color:#8b83b0}
+.private-list-item{display:flex;flex-direction:column;gap:3px;padding:9px 11px;border-radius:12px;border:1px solid rgba(53,224,255,.22);background:rgba(6,10,26,.68)}
+.private-list-address{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;color:#cdeaff}
+.private-list-meta{font-family:var(--veyra-clean);font-size:10px;color:#7d76a0}
+
+/* ---------------------------------------------------------- acknowledgement */
+.private-ack{display:flex;align-items:flex-start;gap:8px;margin:9px 2px 0;cursor:pointer}
+.private-ack-input{flex:0 0 auto;margin:2px 0 0;width:16px;height:16px;accent-color:#35e0ff}
+.private-ack-text{font-family:var(--veyra-clean);font-size:10.5px;line-height:1.5;color:#9c93c4}
+
+/* ---------------------------------------------------------------- explainer */
+.private-details{margin:2px 0 0;padding:10px 12px;border-radius:14px;border:1px dashed rgba(122,107,178,.4);background:rgba(6,4,20,.5)}
+.private-summary{cursor:pointer;font-family:var(--veyra-condensed);font-weight:800;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:#b8aef0}
+.private-explainer{margin-top:8px}
+
+@keyframes privateFade{from{opacity:0}to{opacity:1}}
+@keyframes privateRise{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+body.private-open{overflow:hidden}
+
+/* -------------------------------------------------- mobile landscape support */
+@media (max-height:520px) and (orientation:landscape){
+  .private-overlay{align-items:flex-start;padding:8px}
+  .private-card{max-height:calc(100vh - 16px);width:min(98vw,760px);padding:14px}
+  .private-fields{grid-template-columns:1.4fr 1fr}
+  .private-section{margin-bottom:10px;padding:10px}
+  .private-btn{flex:1 1 40%;min-height:40px}
+}
+
+/* ==================================================================
+   Phase 4A — manual validation: network state line, test mode and the
+   diagnostics surface. None of this changes protocol behaviour; it is
+   display-only (plus the read-only dry run).
+   ================================================================== */
+
+/* ---------------------------------------------- always-visible network state */
+.private-network{margin:0 0 12px;padding:8px 10px;border-radius:12px;font-size:12px;line-height:1.45;border:1px solid rgba(122,107,178,.4);background:rgba(6,3,22,.6);color:#cbb8ff}
+.private-network[data-state='ok']{border-color:rgba(53,224,255,.5);color:#bfeaff}
+.private-network[data-state='warn']{border-color:rgba(255,216,138,.55);color:#ffe6ae}
+.private-network[data-state='off']{border-color:rgba(122,107,178,.35);color:#9d92c8}
+
+/* ------------------------------------------------------- test-mode controls */
+.private-test-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.private-test-label{color:#9d92c8;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.private-test-toggle{cursor:pointer;font:inherit;font-size:11px;letter-spacing:.06em;padding:5px 10px;border-radius:999px;border:1px solid rgba(53,224,255,.45);background:rgba(6,20,30,.7);color:#bfeaff}
+.private-test-toggle[data-state='on']{border-color:rgba(255,216,138,.6);color:#ffe6ae}
+
+/* --------------------------------------------------------- diagnostics panel */
+.private-diag{position:fixed;top:10px;left:10px;z-index:78;width:min(94vw,392px);max-height:min(88vh,760px);overflow:auto;padding:12px 12px 14px;box-sizing:border-box;border-radius:16px;border:1px solid rgba(53,224,255,.4);background:linear-gradient(165deg,rgba(4,10,18,.94),rgba(6,3,20,.95));color:#dff3ff;font-size:12px;line-height:1.5;box-shadow:0 18px 50px rgba(0,0,0,.6)}
+.private-diag[hidden]{display:none}
+body.private-test-mode .private-diag:not([hidden]) ~ .private-overlay{left:auto}
+.private-diag-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.private-diag-title{font-size:11px;letter-spacing:.12em;color:#35e0ff}
+.private-diag-hide{cursor:pointer;font:inherit;font-size:11px;padding:3px 8px;border-radius:8px;border:1px solid rgba(122,107,178,.5);background:transparent;color:#cbb8ff}
+.private-diag-banner{margin:0 0 10px;padding:7px 9px;border-radius:10px;border:1px dashed rgba(255,216,138,.45);background:rgba(30,22,4,.5);color:#ffe6ae;font-size:11px}
+.private-diag-box{margin-bottom:10px;padding:9px 10px;border-radius:12px;border:1px solid rgba(122,107,178,.35);background:rgba(8,5,26,.55)}
+.private-diag-subtitle{margin:0 0 6px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#9d92c8}
+.private-diag-state{margin:0 0 6px;font-weight:700;letter-spacing:.06em}
+.private-diag-state[data-state='ok']{color:#7dffcf}
+.private-diag-state[data-state='warn']{color:#ffbf6b}
+.private-diag-state[data-state='off']{color:#9d92c8}
+.private-diag-rows{display:flex;flex-direction:column;gap:3px}
+.private-diag-row{display:flex;gap:8px;align-items:baseline}
+.private-diag-label{flex:0 0 46%;color:#9d92c8;font-size:11px}
+.private-diag-value{flex:1 1 auto;color:#e8f7ff;word-break:break-all;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px}
+.private-diag-note{margin:6px 0 0;color:#9d92c8;font-size:11px}
+.private-diag-error{margin:6px 0 0;color:#ff9a8a;font-size:11px}
+.private-diag-btn{cursor:pointer;font:inherit;font-size:11px;letter-spacing:.05em;margin-top:6px;padding:6px 10px;border-radius:10px;border:1px solid rgba(53,224,255,.4);background:rgba(6,20,30,.7);color:#bfeaff}
+.private-diag-btn-primary{border-color:rgba(255,216,138,.55);color:#ffe6ae}
+.private-diag-output{margin-top:8px;padding:8px 9px;border-radius:10px;border:1px solid rgba(53,224,255,.3);background:rgba(2,14,22,.7)}
+.private-diag-dryrun-label{margin:0 0 6px;font-weight:700;letter-spacing:.08em;color:#ffd88a}
+@media (max-width:430px){.private-diag{top:auto;bottom:8px;left:8px;right:8px;width:auto;max-height:52vh}}

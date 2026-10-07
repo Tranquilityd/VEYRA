@@ -1,0 +1,82 @@
+/* Veyra — Phase 1: permanent .veyra identity onboarding + HUD chip.
+   Colours and type come from the established Veyra identity tokens defined in
+   styles/veyra-identity.css, so this surface reads as part of the same world. */
+
+/* ------------------------------------------------------------ HUD identity chip */
+.identity-chip{color:#fff;border:1px solid rgba(122,107,178,.62);background:linear-gradient(110deg,rgba(12,6,38,.86),rgba(30,10,52,.72));box-shadow:0 7px 22px rgba(0,0,0,.34),inset 0 1px rgba(255,232,0,.05)}
+.identity-chip .balance-copy small{color:#c9c0ff}
+.identity-chip .balance-copy b{color:#fffbd5}
+.identity-chip .balance-copy em{color:#a997e8}
+.identity-chip:hover{border-color:rgba(255,232,0,.5);box-shadow:0 8px 26px rgba(0,0,0,.38),0 0 14px rgba(122,107,178,.2)}
+.identity-chip[data-state='claimed']{border-color:rgba(255,232,0,.55)}
+.identity-chip[data-state='claimed'] .balance-copy b{color:#FFE800}
+.identity-chip[data-state='claimable'] .balance-copy b{color:#ffe9a8}
+.identity-chip[data-state='error']{border-color:rgba(216,0,39,.6)}
+.identity-chip[data-state='error'] .balance-copy b{color:#ff9a8a}
+.identity-chip .identity-badge{filter:drop-shadow(0 3px 4px rgba(0,0,0,.5))}
+
+/* ------------------------------------------------------------------- overlay */
+.identity-overlay{position:fixed;inset:0;z-index:78;display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;background:radial-gradient(ellipse at 50% 30%,rgba(8,0,195,.28),transparent 62%),rgba(4,3,14,.82);backdrop-filter:blur(7px);animation:identityFade .22s ease-out}
+.identity-overlay[hidden]{display:none}
+.identity-card{position:relative;width:min(94vw,540px);max-height:min(90vh,660px);overflow:auto;padding:22px 20px 20px;box-sizing:border-box;border-radius:20px;border:1px solid rgba(122,107,178,.5);background:linear-gradient(165deg,#0d0830 0%,#120726 46%,#0a0518 100%);box-shadow:0 26px 80px rgba(0,0,0,.72),inset 0 1px rgba(255,232,0,.06);color:#f2eeff;animation:identityRise .28s cubic-bezier(.2,.85,.3,1)}
+.identity-card:before{content:'';position:absolute;inset:0;border-radius:20px;pointer-events:none;background:linear-gradient(180deg,rgba(255,232,0,.05),transparent 34%)}
+.identity-eyebrow{margin:0 0 8px;font-family:var(--veyra-condensed);font-weight:800;font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:var(--veyra-coral)}
+.identity-title{margin:0 0 8px;font-family:var(--veyra-display);font-style:italic;font-weight:950;font-size:clamp(20px,4.6vw,27px);line-height:1.06;letter-spacing:.03em;background:linear-gradient(180deg,#fffbd1 0%,var(--veyra-yellow) 46%,var(--veyra-coral) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 3px 0 rgba(59,0,11,.7))}
+.identity-lead{margin:0 0 16px;font-family:var(--veyra-clean);font-size:12.5px;line-height:1.55;color:#c8c2e6}
+
+/* --------------------------------------------------------------------- field */
+.identity-field{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:15px;border:1.5px solid rgba(122,107,178,.55);background:rgba(6,4,22,.86);box-shadow:inset 0 2px 12px rgba(0,0,0,.5);transition:border-color .2s,box-shadow .2s}
+.identity-field:focus-within{border-color:var(--veyra-yellow);box-shadow:inset 0 2px 12px rgba(0,0,0,.5),0 0 0 3px rgba(255,232,0,.14)}
+.identity-input{flex:1 1 auto;min-width:0;height:46px;border:0;outline:0;background:transparent;color:#fff;font-family:var(--veyra-condensed);font-weight:800;font-size:clamp(19px,4.4vw,24px);letter-spacing:.06em}
+.identity-input::placeholder{color:#584f7d;font-weight:700}
+.identity-suffix{flex:0 0 auto;font-family:var(--veyra-condensed);font-weight:800;font-size:clamp(19px,4.4vw,24px);letter-spacing:.06em;color:var(--veyra-yellow);text-shadow:0 0 12px rgba(255,97,0,.34)}
+
+/* -------------------------------------------------------------------- status */
+.identity-status{min-height:20px;margin:11px 2px 0;font-family:var(--veyra-clean);font-weight:700;font-size:12px;line-height:1.45;color:#a79ec9}
+.identity-status[data-state='available']{color:#8bf7a8}
+.identity-status[data-state='checking']{color:#9fd8ff}
+.identity-status[data-state='taken'],.identity-status[data-state='invalid'],.identity-status[data-state='reserved']{color:#ff9a8a}
+.identity-status[data-state='error']{color:#ffc46b}
+.identity-rules{margin:9px 2px 0;font-family:var(--veyra-clean);font-size:10.5px;line-height:1.55;color:#7d76a0}
+
+/* ------------------------------------------------------------------ actions */
+.identity-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:17px}
+.identity-btn{flex:1 1 150px;min-height:46px;padding:0 16px;border-radius:12px;border:1px solid rgba(122,107,178,.55);background:rgba(10,6,30,.85);color:#d7d0f2;font-family:var(--veyra-display);font-weight:900;font-size:12px;letter-spacing:.12em;cursor:pointer;transition:filter .18s,border-color .18s,transform .12s}
+.identity-btn:hover{filter:brightness(1.08);border-color:rgba(255,232,0,.42)}
+.identity-btn:active{transform:scale(.985)}
+.identity-btn:disabled{opacity:.45;cursor:not-allowed;filter:none;transform:none}
+.identity-btn-primary{border-color:rgba(255,246,138,.9);background:linear-gradient(112deg,#fff56b 0%,var(--veyra-yellow) 54%,#ffc800 100%);color:var(--veyra-cobalt);text-shadow:none;box-shadow:0 8px 26px rgba(255,97,0,.24)}
+.identity-btn-primary:hover{filter:brightness(1.06);box-shadow:0 10px 32px rgba(255,97,0,.34)}
+
+/* -------------------------------------------------------------- claimed view */
+.identity-view-done{text-align:center;padding-top:4px}
+.identity-done-label{margin:2px 0 12px;font-family:var(--veyra-clean);font-weight:700;font-size:12.5px;color:#b7afe0;letter-spacing:.02em}
+.identity-done-name{margin:0;font-family:var(--veyra-display);font-weight:950;font-size:clamp(23px,6vw,34px);letter-spacing:.02em;background:linear-gradient(180deg,#fffbd1,var(--veyra-yellow) 52%,var(--veyra-coral));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 3px 0 rgba(59,0,11,.72));word-break:break-all}
+.identity-done-wallet{margin:9px 0 0;font-family:var(--veyra-condensed);font-weight:700;font-size:10.5px;letter-spacing:.14em;color:#8f87b5}
+.identity-done-note{margin:13px 0 0;font-family:var(--veyra-clean);font-size:11px;line-height:1.55;color:#8680a8}
+.identity-view-done .identity-actions,.identity-view-done .identity-btn{margin-top:17px}
+
+/* --------------------------------------------------------------- responsive */
+/* Horizontal mobile and short viewports: keep the whole card reachable. */
+@media(max-height:560px){
+  .identity-overlay{padding:10px}
+  .identity-card{max-height:96vh;padding:16px 16px 14px;border-radius:16px}
+  .identity-lead{margin-bottom:12px;font-size:11.5px}
+  .identity-input{height:40px}
+  .identity-actions{margin-top:12px}
+  .identity-btn{min-height:42px;flex-basis:130px}
+}
+@media(max-width:560px){
+  .identity-card{padding:18px 15px 16px}
+  .identity-btn{flex-basis:100%}
+  .identity-actions .identity-btn+.identity-btn{order:2}
+}
+@media(max-width:560px){
+  .hud-top-right .identity-chip .balance-copy em{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+  .identity-overlay,.identity-card{animation:none}
+  .identity-btn{transition:none}
+}
+@keyframes identityFade{from{opacity:0}to{opacity:1}}
+@keyframes identityRise{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}

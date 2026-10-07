@@ -6,7 +6,9 @@ import {
   REWARD_GAMES, NON_REWARD_GAMES, createArcadeChallenge, verifyArcadeRound,
   issueArcadeRoundToken, verifyArcadeRoundToken, neonEscapeParams, nBackParams,
 } from '../server/arcade-protocol.js';
-const handler=readFileSync(new URL('../api/arcade/session.js',import.meta.url),'utf8');
+const account=readFileSync(new URL('../api/account/[route].js',import.meta.url),'utf8');
+const route=name=>{const m=account.match(new RegExp('// ---- route: '+name+' ----\\n([\\s\\S]*?)// ---- end route: '+name+' ----'));if(!m)throw new Error(`route ${name} missing from api/account/[route].js`);return m[1];};
+const handler=route('arcadeSession');
 const client=readFileSync(new URL('../src/games/arcadeRewards.js',import.meta.url),'utf8');
 const games=readFileSync(new URL('../src/ui/arcadeGames.js',import.meta.url),'utf8');
 const overlay=readFileSync(new URL('../src/ui/GameOverlay.js',import.meta.url),'utf8');

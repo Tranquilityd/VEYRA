@@ -52,7 +52,7 @@ test('transition authorization helper fails closed on network and malformed stat
 });
 
 test('site-entry endpoint is isolated from Arcade withdrawals and balances',()=>{
- const entry=fs.readFileSync(new URL('../api/site-entry.js',import.meta.url),'utf8');const withdrawal=fs.readFileSync(new URL('../api/withdrawals.js',import.meta.url),'utf8');const admin=fs.readFileSync(new URL('../server/admin-withdrawals-handler.js',import.meta.url),'utf8');
+ const entry=fs.readFileSync(new URL('../api/site-entry.js',import.meta.url),'utf8');const account=fs.readFileSync(new URL('../api/account/[route].js',import.meta.url),'utf8');const route=name=>{const m=account.match(new RegExp('// ---- route: '+name+' ----\\n([\\s\\S]*?)// ---- end route: '+name+' ----'));if(!m)throw new Error(`route ${name} missing from api/account/[route].js`);return m[1];};const withdrawal=route('withdrawals');const admin=fs.readFileSync(new URL('../server/admin-withdrawals-handler.js',import.meta.url),'utf8');
  assert.doesNotMatch(entry,/\bdb\s*\(|withdrawals|arcade_balances|balance\s*[+-]=|blockchain/i);assert.match(withdrawal,/await verifyTurnstileToken/);assert.match(withdrawal,/const row=await sql\.begin/);assert.ok(withdrawal.indexOf('await verifyTurnstileToken')<withdrawal.indexOf('const row=await sql.begin'));assert.match(admin,/balance=balance-/);
 });
 
